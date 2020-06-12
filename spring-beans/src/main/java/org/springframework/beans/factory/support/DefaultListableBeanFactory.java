@@ -867,6 +867,11 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				else {
 					//如果不是FactoryBean，就直接调用getBean()方法进行初始化
 					//important！
+					/*
+					  注意，一般我们从容器中获取bean就是调用getBean方法，
+					  但是实际上getBean方法起到两个职责，如果bean没有被初始化就会被初始化，再返回；如果bean被初始化，则从容器中获取到该bean并且返回
+					  所以此处循环调用getBean方法，就是循环将每一个bean给初始化
+					 */
 					getBean(beanName);
 				}
 			}

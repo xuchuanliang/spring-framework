@@ -235,16 +235,32 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @return an instance of the bean
 	 * @throws BeansException if the bean could not be created
 	 */
+	/**
+	 * 初始化bean的真实方法
+	 */
 	@SuppressWarnings("unchecked")
 	protected <T> T doGetBean(
 			String name, @Nullable Class<T> requiredType, @Nullable Object[] args, boolean typeCheckOnly)
 			throws BeansException {
 
+		//获取一个bean的真实名称，主要处理以下两种情况
+		//1.如果FactoryBean，那么按照前面逻辑中是会在beanName前追加&符号
+		//2.如果是一个别名，那么也要转化成真实的beanName
 		String beanName = transformedBeanName(name);
+
+		//方法的返回值
 		Object bean;
 
 		// Eagerly check singleton cache for manually registered singletons.
+		/*
+			重要！！
+			这里先去检查bean是不是已经创建过了
+			此处内容待补充（涉及到解决循环依赖的问题）
+			此处涉及到singletonObjects、earlySingletonObjects这两个对象缓存池
+		 */
 		Object sharedInstance = getSingleton(beanName);
+		//前面我们一路进来的时候都是 getBean(beanName)，
+		//所以 args 传参其实是 null 的，但是如果 args 不为空的时候，那么意味着调用方不是希望获取 Bean，而是创建 Bean
 		if (sharedInstance != null && args == null) {
 			if (logger.isTraceEnabled()) {
 				if (isSingletonCurrentlyInCreation(beanName)) {
@@ -255,22 +271,32 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 					logger.trace("Returning cached instance of singleton bean '" + beanName + "'");
 				}
 			}
+			//如果是普通 Bean 的话，直接返回 sharedInstance，
+			//如果是 FactoryBean 的话，返回它创建的那个实例对象
 			bean = getObjectForBeanInstance(sharedInstance, name, beanName, null);
 		}
 
 		else {
 			// Fail if we're already creating this bean instance:
 			// We're assumably within a circular reference.
+			//创建过了此 beanName 的 prototype 类型的 bean，那么抛异常，
+			//往往是因为陷入了循环引用
 			if (isPrototypeCurrentlyInCreation(beanName)) {
 				throw new BeanCurrentlyInCreationException(beanName);
 			}
 
 			// Check if bean definition exists in this factory.
+			// 检查一下这个 BeanDefinition 在容器中是否存在
 			BeanFactory parentBeanFactory = getParentBeanFactory();
+			//如果父容器中不为空，并且当前容器不包含该名称的BeanDefinition
 			if (parentBeanFactory != null && !containsBeanDefinition(beanName)) {
+				//尝试从父容器中能否获取到该Bean
+				//此处步骤与本次getBean类似，只不过从当前工厂的parent BeanFactory中获取，此处就不再赘述
 				// Not found -> check parent.
+				//将当前的名称再转回到transformedBeanName(name);前的名称，实际上就是一个反向操作
 				String nameToLookup = originalBeanName(name);
 				if (parentBeanFactory instanceof AbstractBeanFactory) {
+					//返回父容器中获取的结果
 					return ((AbstractBeanFactory) parentBeanFactory).doGetBean(
 							nameToLookup, requiredType, args, typeCheckOnly);
 				}
@@ -288,14 +314,21 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			}
 
 			if (!typeCheckOnly) {
+				//如果typeCheckOnly为false，则将当前beanName存入alreadyCreated缓存中
 				markBeanAsCreated(beanName);
 			}
 
+			//从这里开始准备创建 Bean，对于 singleton 的 Bean 来说，容器中还没创建过此 Bean；
+			//对于 prototype 的 Bean 来说，本来就是要创建一个新的 Bean。
 			try {
+				//获取这个bean的Definition
 				RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
 				checkMergedBeanDefinition(mbd, beanName, args);
 
 				// Guarantee initialization of beans that the current bean depends on.
+				//获取这个bean的所有依赖，先初始化依赖的所有的bean
+				//注意，此处的依赖指的是depends-on中定义的依赖
+				//此处一般情况下我们也不定义depends-on，所以可以先忽略
 				String[] dependsOn = mbd.getDependsOn();
 				if (dependsOn != null) {
 					for (String dep : dependsOn) {
@@ -315,6 +348,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				}
 
 				// Create bean instance.
+				//重要！ 如果是单例，则开始创建singleton bean的实例
 				if (mbd.isSingleton()) {
 					sharedInstance = getSingleton(beanName, () -> {
 						try {
