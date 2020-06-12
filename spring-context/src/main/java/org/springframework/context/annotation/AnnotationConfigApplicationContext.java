@@ -83,9 +83,25 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 * @param componentClasses one or more component classes &mdash; for example,
 	 * {@link Configuration @Configuration} classes
 	 */
+	/**
+	 * 这是入口方法
+	 * @param componentClasses
+	 */
 	public AnnotationConfigApplicationContext(Class<?>... componentClasses) {
+		/**
+		 * 默认调用父类GenericApplicationContext的构造方法，创建默认的beanFactory，类型是DefaultListableBeanFactory
+		 * 创建一个AnnotatedBeanDefinitionReader类
+		 * 创建一个ClassPathBeanDefinitionScanner类
+		 */
 		this();
+		/**
+		 * 调用AnnotatedBeanDefinitionReader的register方法，将当前配置类转成AnnotatedGenericBeanDefinition-->definitionHolder
+		 * 最终使用BeanDefinitionReaderUtils.registerBeanDefinition()注册到registry中，此处的registry操作实际上是将beanDefinition注册到DefaultListableBeanFactory的beanDefinitionMap中
+		 */
 		register(componentClasses);
+		/**
+		 * 调用refresh方法
+		 */
 		refresh();
 	}
 
