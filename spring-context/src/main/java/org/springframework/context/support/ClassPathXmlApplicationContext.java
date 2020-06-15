@@ -135,18 +135,23 @@ public class ClassPathXmlApplicationContext extends AbstractXmlApplicationContex
 	 * @see #refresh()
 	 */
 	/*
-	系统调用BeanPostProcesser的地方：
-	1.org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.resolveBeforeInstantiation
-	发生作用的是InstantiationAwareBeanPostProcessor.postProcessBeforeInstantiation()
-	2.org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.applyMergedBeanDefinitionPostProcessors
-	发生作用的是MergedBeanDefinitionPostProcessor.postProcessMergedBeanDefinition()
-	3.org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.getEarlyBeanReference
-	发生作用的是SmartInstantiationAwareBeanPostProcessor.getEarlyBeanReference()  解决循环引用问题
-	4.org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.populateBean
-	发生作用的是InstantiationAwareBeanPostProcessor.postProcessAfterInstantiation()
-	5.org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.populateBean
-	发生作用的是InstantiationAwareBeanPostProcessor.postProcessProperties()
+		系统调用BeanPostProcesser的地方：
+		1.org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.resolveBeforeInstantiation
+		发生作用的是InstantiationAwareBeanPostProcessor.postProcessBeforeInstantiation()
+		2.org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.applyMergedBeanDefinitionPostProcessors
+		发生作用的是MergedBeanDefinitionPostProcessor.postProcessMergedBeanDefinition()
+		3.org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.getEarlyBeanReference
+		发生作用的是SmartInstantiationAwareBeanPostProcessor.getEarlyBeanReference()  解决循环引用问题
+		4.org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.populateBean
+		发生作用的是InstantiationAwareBeanPostProcessor.postProcessAfterInstantiation()
+		5.org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.populateBean
+		发生作用的是InstantiationAwareBeanPostProcessor.postProcessProperties()
 
+		关于ApplicationContext和BeanFactory
+		虽然ApplicationContext继承BeanFactory，但是此处类似于java I/O流的包装模式，实际上ApplicationContext内部持有一个DefaultListableBeanFactory引用，
+		所有对BeanFactory的操作都是委托给DefaultListableBeanFactory执行操作
+
+		2020年6月15日 17:52:36 同理，以后你要是碰到 <dubbo /> 这种标签，那么就应该搜一搜是不是有 DubboNamespaceHandler 这个处理类。org.springframework.beans.factory.xml.BeanDefinitionParserDelegate.parseCustomElement(org.w3c.dom.Element, org.springframework.beans.factory.config.BeanDefinition)
 	 */
 	public ClassPathXmlApplicationContext(
 			String[] configLocations, boolean refresh, @Nullable ApplicationContext parent)

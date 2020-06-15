@@ -1383,6 +1383,7 @@ public class BeanDefinitionParserDelegate {
 		if (namespaceUri == null) {
 			return null;
 		}
+		//实际上是使用NamespaceHandler解析对应的定制标签，如AopNamespaceHandler、CacheNamespaceHandler、ContextNamespaceHandler、MvcNamespaceHandler等等
 		NamespaceHandler handler = this.readerContext.getNamespaceHandlerResolver().resolve(namespaceUri);
 		if (handler == null) {
 			error("Unable to locate Spring NamespaceHandler for XML schema namespace [" + namespaceUri + "]", ele);
