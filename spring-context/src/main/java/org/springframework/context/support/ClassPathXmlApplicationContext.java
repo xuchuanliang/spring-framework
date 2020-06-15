@@ -134,6 +134,20 @@ public class ClassPathXmlApplicationContext extends AbstractXmlApplicationContex
 	 * @throws BeansException if context creation failed
 	 * @see #refresh()
 	 */
+	/*
+	系统调用BeanPostProcesser的地方：
+	1.org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.resolveBeforeInstantiation
+	发生作用的是InstantiationAwareBeanPostProcessor.postProcessBeforeInstantiation()
+	2.org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.applyMergedBeanDefinitionPostProcessors
+	发生作用的是MergedBeanDefinitionPostProcessor.postProcessMergedBeanDefinition()
+	3.org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.getEarlyBeanReference
+	发生作用的是SmartInstantiationAwareBeanPostProcessor.getEarlyBeanReference()  解决循环引用问题
+	4.org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.populateBean
+	发生作用的是InstantiationAwareBeanPostProcessor.postProcessAfterInstantiation()
+	5.org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.populateBean
+	发生作用的是InstantiationAwareBeanPostProcessor.postProcessProperties()
+
+	 */
 	public ClassPathXmlApplicationContext(
 			String[] configLocations, boolean refresh, @Nullable ApplicationContext parent)
 			throws BeansException {

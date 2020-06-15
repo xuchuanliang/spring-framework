@@ -178,6 +178,12 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 */
 	/*
 		此处涉及到singletonObjects、earlySingletonObjects这两个对象缓存池
+		注意：allowEarlyReference参数传进来写死的true，字面意思是允许提前关联，是否与循环依赖关联？
+		singletonObjects？
+		singletonsCurrentlyInCreation？
+		earlySingletonObjects？
+		singletonFactories？
+
 	 */
 	@Nullable
 	protected Object getSingleton(String beanName, boolean allowEarlyReference) {
@@ -186,7 +192,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 		//如果从singletonObjects缓冲中获取到的bean为空（此时第一次获取肯定是空）
 		//并且是正在创建中的bean，判断是否是正在创建中的bean，是从singletonsCurrentlyInCreation这个缓存中获取一次
 		//下面的语句实际上就是if (singletonObject == null && this.singletonsCurrentlyInCreation.contains(beanName))
-		//加入我们有UserService和OrgService，并且相互引用，在创建初始化第一个bean时，isSingletonCurrentlyInCreation(beanName)是false，因为当前还没有正在创建中的对象在earlySingletonObjects缓存中
+		//假如我们有UserService和OrgService，并且相互引用，在创建初始化第一个bean时，isSingletonCurrentlyInCreation(beanName)是false，因为当前还没有正在创建中的对象在earlySingletonObjects缓存中
 		if (singletonObject == null && isSingletonCurrentlyInCreation(beanName)) {
 			synchronized (this.singletonObjects) {
 				singletonObject = this.earlySingletonObjects.get(beanName);
