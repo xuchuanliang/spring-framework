@@ -195,16 +195,20 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 	}
 
 	private void parseDefaultElement(Element ele, BeanDefinitionParserDelegate delegate) {
+		//处理<import/>标签
 		if (delegate.nodeNameEquals(ele, IMPORT_ELEMENT)) {
 			importBeanDefinitionResource(ele);
 		}
+		//处理<alias/>标签
 		else if (delegate.nodeNameEquals(ele, ALIAS_ELEMENT)) {
 			processAliasRegistration(ele);
 		}
+		//处理<bean/>标签
 		else if (delegate.nodeNameEquals(ele, BEAN_ELEMENT)) {
 			//这里我们看<bean></bean>
 			processBeanDefinition(ele, delegate);
 		}
+		//处理<beans/>标签：递归
 		else if (delegate.nodeNameEquals(ele, NESTED_BEANS_ELEMENT)) {
 			// recurse
 			doRegisterBeanDefinitions(ele);
@@ -312,11 +316,18 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 	 * and registering it with the registry.
 	 */
 	protected void processBeanDefinition(Element ele, BeanDefinitionParserDelegate delegate) {
+		// 将 <bean /> 节点中的信息提取出来，解析成为一个GenericBeanDefinition，然后封装到一个 BeanDefinitionHolder 中，
+		//实际上解析<bean/>标签以及标签中的元素
 		BeanDefinitionHolder bdHolder = delegate.parseBeanDefinitionElement(ele);
 		if (bdHolder != null) {
+			// 如果有自定义属性的话，进行相应的解析，先忽略
 			bdHolder = delegate.decorateBeanDefinitionIfRequired(ele, bdHolder);
 			try {
 				// Register the final decorated instance.
+				//注册BeanDefinition，作用是将已经解析完成的GenericBeanDefinition注册到DefaultListableBeanFactory中
+				//实际上调用的是org.springframework.beans.factory.support.DefaultListableBeanFactory.registerBeanDefinition方法
+				//最终是将GenericBeanDefinition存入beanDefinitionMap中
+				//DefaultListableBeanFactory.beanDefinitionMap.put(beanName, beanDefinition);
 				BeanDefinitionReaderUtils.registerBeanDefinition(bdHolder, getReaderContext().getRegistry());
 			}
 			catch (BeanDefinitionStoreException ex) {
@@ -324,6 +335,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 						bdHolder.getBeanName() + "'", ele, ex);
 			}
 			// Send registration event.
+			// 注册完成后，发送事件
 			getReaderContext().fireComponentRegistered(new BeanComponentDefinition(bdHolder));
 		}
 	}

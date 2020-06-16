@@ -151,7 +151,6 @@ public class ClassPathXmlApplicationContext extends AbstractXmlApplicationContex
 		虽然ApplicationContext继承BeanFactory，但是此处类似于java I/O流的包装模式，实际上ApplicationContext内部持有一个DefaultListableBeanFactory引用，
 		所有对BeanFactory的操作都是委托给DefaultListableBeanFactory执行操作
 
-		2020年6月15日 17:52:36 同理，以后你要是碰到 <dubbo /> 这种标签，那么就应该搜一搜是不是有 DubboNamespaceHandler 这个处理类。org.springframework.beans.factory.xml.BeanDefinitionParserDelegate.parseCustomElement(org.w3c.dom.Element, org.springframework.beans.factory.config.BeanDefinition)
 	 */
 	public ClassPathXmlApplicationContext(
 			String[] configLocations, boolean refresh, @Nullable ApplicationContext parent)
@@ -161,6 +160,7 @@ public class ClassPathXmlApplicationContext extends AbstractXmlApplicationContex
 		setConfigLocations(configLocations);
 		if (refresh) {
 			//important method!
+			//关键方法
 			refresh();
 		}
 	}

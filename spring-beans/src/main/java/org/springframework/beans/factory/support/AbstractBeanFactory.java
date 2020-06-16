@@ -230,8 +230,9 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @return an instance of the bean
 	 * @throws BeansException if the bean could not be created
 	 */
-	/**
-	 * 初始化bean的真实方法
+	/*
+		初始化bean和获取bean的方法
+		注意：方法名称虽然是doGetBean，实际上该方法有两个职责，如果bean存在则会返回已经创建的bean，如果bean不存在，则会初始化bean然后返回
 	 */
 	@SuppressWarnings("unchecked")
 	protected <T> T doGetBean(
@@ -254,6 +255,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			此处涉及到singletonObjects、earlySingletonObjects这两个对象缓存池
 		 */
 		Object sharedInstance = getSingleton(beanName);
+
 		//前面我们一路进来的时候都是 getBean(beanName)，
 		//所以 args 传参其实是 null 的，但是如果 args 不为空的时候，那么意味着调用方不是希望获取 Bean，而是创建 Bean
 		if (sharedInstance != null && args == null) {

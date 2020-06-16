@@ -670,6 +670,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * such as the context's ClassLoader and post-processors.
 	 * @param beanFactory the BeanFactory to configure
 	 */
+	/*
+		spring手动注册一些特殊的bean到容器中，对BeanFactory进行更多的配置
+	 */
 	protected void prepareBeanFactory(ConfigurableListableBeanFactory beanFactory) {
 		// Tell the internal bean factory to use the context's class loader etc.
 		// 设置 BeanFactory 的类加载器，我们知道 BeanFactory 需要加载类，也就需要类加载器，
@@ -681,7 +684,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		beanFactory.addPropertyEditorRegistrar(new ResourceEditorRegistrar(this, getEnvironment()));
 
 		// Configure the bean factory with context callbacks.
-		//增加ApplicationContextAwareProcessor，该实例主要作用是对所有实现Aware接口的bean进行回调操作，
+		//增加一个特殊的BeanPostProcessor：ApplicationContextAwareProcessor，该实例主要作用是对所有实现Aware接口的bean进行回调操作，
 		// 如：EnvironmentAware、EmbeddedValueResolverAware、ResourceLoaderAware、ApplicationEventPublisherAware、MessageSourceAware、ApplicationContextAware
 		beanFactory.addBeanPostProcessor(new ApplicationContextAwareProcessor(this));
 
@@ -709,6 +712,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 		// Register early post-processor for detecting inner beans as ApplicationListeners.
 		//在 bean 实例化后，如果是 ApplicationListener 的子类，那么将其添加到 listener 列表中，可以理解成：注册 事件监听器
+		//增加一个特殊的BeanPostProcessor：ApplicationListenerDetector
 		beanFactory.addBeanPostProcessor(new ApplicationListenerDetector(this));
 
 		// Detect a LoadTimeWeaver and prepare for weaving, if found.
@@ -722,7 +726,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		}
 
 		// Register default environment beans.
-		//如果没有定义 "environment" 这个 bean，那么 Spring 会 "手动" 注册一个
+		//如果没有定义 "environment" 这个 bean，那么 Spring 会 "手动" 注册一个单例的ConfigurableEnvironment到DefaultSingleBeanRegistry的singletonObjects中
 		if (!beanFactory.containsLocalBean(ENVIRONMENT_BEAN_NAME)) {
 			beanFactory.registerSingleton(ENVIRONMENT_BEAN_NAME, getEnvironment());
 		}
