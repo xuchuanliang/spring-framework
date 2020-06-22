@@ -144,37 +144,41 @@ public abstract class AnnotationConfigUtils {
 	 * that this registration was triggered from. May be {@code null}.
 	 * @return a Set of BeanDefinitionHolders, containing all bean definitions
 	 * that have actually been registered by this call
+	 *
+	 * 向注册器中注册所有使用annotationConfigApplicationContext相关的BeanPostProcessor
+	 *
+	 *
 	 */
 	public static Set<BeanDefinitionHolder> registerAnnotationConfigProcessors(
 			BeanDefinitionRegistry registry, @Nullable Object source) {
 
 		DefaultListableBeanFactory beanFactory = unwrapDefaultListableBeanFactory(registry);
 		if (beanFactory != null) {
-			if (!(beanFactory.getDependencyComparator() instanceof AnnotationAwareOrderComparator)) {
+			if (!(beanFactory.getDependencyComparator() instanceof AnnotationAwareOrderComparator)) {//创建默认的依赖比较器
 				beanFactory.setDependencyComparator(AnnotationAwareOrderComparator.INSTANCE);
 			}
-			if (!(beanFactory.getAutowireCandidateResolver() instanceof ContextAnnotationAutowireCandidateResolver)) {
+			if (!(beanFactory.getAutowireCandidateResolver() instanceof ContextAnnotationAutowireCandidateResolver)) {//提供对@Lazy的支持
 				beanFactory.setAutowireCandidateResolver(new ContextAnnotationAutowireCandidateResolver());
 			}
 		}
 
 		Set<BeanDefinitionHolder> beanDefs = new LinkedHashSet<>(8);
-
+		//判断register是否包含名称为org.springframework.context.annotation.internalConfigurationAnnotationProcessor的BeanDefinition
 		if (!registry.containsBeanDefinition(CONFIGURATION_ANNOTATION_PROCESSOR_BEAN_NAME)) {
-			RootBeanDefinition def = new RootBeanDefinition(ConfigurationClassPostProcessor.class);
+			RootBeanDefinition def = new RootBeanDefinition(ConfigurationClassPostProcessor.class);//创建类型为ConfigurationClassPostProcessor的RootBeanDefinition，该RootBeanDefinition的Role是ROLE_INFRASTRUCTURE，表示该bd是spring内部定义使用的
 			def.setSource(source);
 			beanDefs.add(registerPostProcessor(registry, def, CONFIGURATION_ANNOTATION_PROCESSOR_BEAN_NAME));
 		}
-
+		//判断注册器中是否存在名称为org.springframework.context.annotation.internalAutowiredAnnotationProcessor的BeanDefinition
 		if (!registry.containsBeanDefinition(AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME)) {
-			RootBeanDefinition def = new RootBeanDefinition(AutowiredAnnotationBeanPostProcessor.class);
+			RootBeanDefinition def = new RootBeanDefinition(AutowiredAnnotationBeanPostProcessor.class);//创建类型为AutowiredAnnotationBeanPostProcessor的RootBeanDefinition，该RootBeanDefinition的Role是ROLE_INFRASTRUCTURE，表示该bd是spring内部定义使用的
 			def.setSource(source);
 			beanDefs.add(registerPostProcessor(registry, def, AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
 		}
-
+		//判断注册器中是否存在名称为org.springframework.context.annotation.internalCommonAnnotationProcessor的BeanDefinition
 		// Check for JSR-250 support, and if present add the CommonAnnotationBeanPostProcessor.
 		if (jsr250Present && !registry.containsBeanDefinition(COMMON_ANNOTATION_PROCESSOR_BEAN_NAME)) {
-			RootBeanDefinition def = new RootBeanDefinition(CommonAnnotationBeanPostProcessor.class);
+			RootBeanDefinition def = new RootBeanDefinition(CommonAnnotationBeanPostProcessor.class);//创建类型为CommonAnnotationBeanPostProcessor的RootBeanDefinition，role是ROLE_INFRASTRUCTURE，该bean是spring内部使用的bean
 			def.setSource(source);
 			beanDefs.add(registerPostProcessor(registry, def, COMMON_ANNOTATION_PROCESSOR_BEAN_NAME));
 		}
@@ -193,7 +197,7 @@ public abstract class AnnotationConfigUtils {
 			def.setSource(source);
 			beanDefs.add(registerPostProcessor(registry, def, PERSISTENCE_ANNOTATION_PROCESSOR_BEAN_NAME));
 		}
-
+		//向注册器中注入org.springframework.context.event.internalEventListenerProcessor
 		if (!registry.containsBeanDefinition(EVENT_LISTENER_PROCESSOR_BEAN_NAME)) {
 			RootBeanDefinition def = new RootBeanDefinition(EventListenerMethodProcessor.class);
 			def.setSource(source);
@@ -212,7 +216,7 @@ public abstract class AnnotationConfigUtils {
 	private static BeanDefinitionHolder registerPostProcessor(
 			BeanDefinitionRegistry registry, RootBeanDefinition definition, String beanName) {
 
-		definition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+		definition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);//表示该beanDefinition是spring内部注册使用的BeanDefinition
 		registry.registerBeanDefinition(beanName, definition);
 		return new BeanDefinitionHolder(definition, beanName);
 	}

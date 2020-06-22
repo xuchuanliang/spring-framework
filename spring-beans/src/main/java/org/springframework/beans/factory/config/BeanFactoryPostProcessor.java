@@ -21,35 +21,45 @@ import org.springframework.beans.BeansException;
 /**
  * Allows for custom modification of an application context's bean definitions,
  * adapting the bean property values of the context's underlying bean factory.
+ * 允许自定义修改应用上下文的BeanDefinition
  *
  * <p>Application contexts can auto-detect BeanFactoryPostProcessor beans in
  * their bean definitions and apply them before any other beans get created.
+ * spring应用上下文会自动检测所有BeanDefinition中的BeanFactoryPostProcessor的实现类，并且在创建其他bean之前调用这些BeanFactoryPostProcessor
  *
  * <p>Useful for custom config files targeted at system administrators that
  * override bean properties configured in the application context.
  *
- * <p>See PropertyResourceConfigurer and its concrete implementations
- * for out-of-the-box solutions that address such configuration needs.
+ * <p>See PropertyResourceConfigurer and its concrete implementations for out-of-the-box solutions that address such configuration needs.
+ *	查看PropertyResourceConfigurer，他是BeanFactoryPostProcessor的一个实现类，为了解决配置问题的开箱即用的解决方案
  *
- * <p>A BeanFactoryPostProcessor may interact with and modify bean
- * definitions, but never bean instances. Doing so may cause premature bean
- * instantiation, violating the container and causing unintended side-effects.
+ * <p>A BeanFactoryPostProcessor may interact with and modify bean definitions, but never bean instances.
+ *	BeanFactoryPostProcessor可能影响或者修改BeanDefinition，但是不会影响bean的实例
+ * Doing so may cause premature bean instantiation, violating the container and causing unintended side-effects.
+ * 这样做可能会导致bean的提前实例化、破坏容器并产生意外的副作用
  * If bean instance interaction is required, consider implementing
  * {@link BeanPostProcessor} instead.
+ * 如果需要对Bean的实例进行操作，可以实现BeanPostProcessor接口
  *
  * @author Juergen Hoeller
  * @since 06.07.2003
  * @see BeanPostProcessor
  * @see PropertyResourceConfigurer
+ * 总的来说：BeanFactoryPostProcessor是在BeanDefinition被加载之后，bean被实例化之前被调用，主要能够修改beanFactory和beanDefinition
  */
 @FunctionalInterface
 public interface BeanFactoryPostProcessor {
 
 	/**
 	 * Modify the application context's internal bean factory after its standard
-	 * initialization. All bean definitions will have been loaded, but no beans
-	 * will have been instantiated yet. This allows for overriding or adding
-	 * properties even to eager-initializing beans.
+	 * initialization.
+	 * 在进行标准化的初始化之后，允许修改应用上下文的内部bean工厂
+	 * All bean definitions will have been loaded,
+	 * 所有的beanDefinition应该已经被加载
+	 * but no beans will have been instantiated yet.
+	 * 但是还没有bean被实例化
+	 * This allows for overriding or adding properties even to eager-initializing beans.
+	 *	他允许在创建bean之前做一些事情
 	 * @param beanFactory the bean factory used by the application context
 	 * @throws org.springframework.beans.BeansException in case of errors
 	 */

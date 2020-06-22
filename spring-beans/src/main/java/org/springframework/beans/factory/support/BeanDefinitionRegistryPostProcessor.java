@@ -20,11 +20,14 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 
 /**
- * Extension to the standard {@link BeanFactoryPostProcessor} SPI, allowing for
- * the registration of further bean definitions <i>before</i> regular
- * BeanFactoryPostProcessor detection kicks in. In particular,
- * BeanDefinitionRegistryPostProcessor may register further bean definitions
- * which in turn define BeanFactoryPostProcessor instances.
+ * Extension to the standard {@link BeanFactoryPostProcessor} SPI,
+ * 是BeanFactoryPostProcessor SPI的扩展
+ * allowing for the registration of further bean definitions <i>before</i> regular BeanFactoryPostProcessor detection kicks in.
+ *
+ *  In particular,
+ *  尤其是
+ * BeanDefinitionRegistryPostProcessor may register further bean definitions which in turn define BeanFactoryPostProcessor instances
+ * .
  *
  * @author Juergen Hoeller
  * @since 3.0.1
@@ -34,9 +37,16 @@ public interface BeanDefinitionRegistryPostProcessor extends BeanFactoryPostProc
 
 	/**
 	 * Modify the application context's internal bean definition registry after its
-	 * standard initialization. All regular bean definitions will have been loaded,
-	 * but no beans will have been instantiated yet. This allows for adding further
+	 * standard initialization.
+	 * 在进行标准化初始化之后，允许修改上下文内部bean Definition registry(beanDefinition注册器)
+	 * All regular bean definitions will have been loaded,
+	 * 所有的beanDefinition应该已经被加载完成
+	 * but no beans will have been instantiated yet.
+	 * 但是没有bean被实例化
+	 * This allows for adding further
 	 * bean definitions before the next post-processing phase kicks in.
+	 *他允许在下一个阶段的post-processing开始之前添加更进一步的bean Definition，
+	 * 也就是在postProcessBeanFactory之前执行
 	 * @param registry the bean definition registry used by the application context
 	 * @throws org.springframework.beans.BeansException in case of errors
 	 */

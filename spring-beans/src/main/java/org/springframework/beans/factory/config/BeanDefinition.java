@@ -79,6 +79,7 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	int ROLE_SUPPORT = 1;
 
 	/**
+	 * 表示该BeanDefinition是spring内部定义的bean，不是用户定义的Bean
 	 * Role hint indicating that a {@code BeanDefinition} is providing an
 	 * entirely background role and has no relevance to the end-user. This hint is
 	 * used when registering beans that are completely part of the internal workings

@@ -39,6 +39,11 @@ import org.springframework.util.Assert;
  * <p>This is an alternative to {@link ClassPathBeanDefinitionScanner}, applying
  * the same resolution of annotations but for explicitly registered classes only.
  *
+ * 见名知意，被注解的BeanDefinition读取器，与ClassPathBeanDefinitionScanner一样，专门用来读取被注解的BeanDefinition
+ *
+ *
+ *
+ *
  * @author Juergen Hoeller
  * @author Chris Beams
  * @author Sam Brannen
@@ -126,8 +131,9 @@ public class AnnotatedBeanDefinitionReader {
 
 	/**
 	 * Register one or more component classes to be processed.
-	 * <p>Calls to {@code register} are idempotent; adding the same
-	 * component class more than once has no additional effect.
+	 * <p>Calls to {@code register} are idempotent; adding the same component class more than once has no additional effect.
+	 * 注册一个或多个需要处理的组件类，循环调用registerBean方法，
+	 * 多次添加相同的组件类不会产生重复的效果
 	 * @param componentClasses one or more component classes,
 	 * e.g. {@link Configuration @Configuration} classes
 	 */
@@ -141,6 +147,8 @@ public class AnnotatedBeanDefinitionReader {
 	 * Register a bean from the given bean class, deriving its metadata from
 	 * class-declared annotations.
 	 * @param beanClass the class of the bean
+	 *
+	 *  委托调用
 	 */
 	public void registerBean(Class<?> beanClass) {
 		doRegisterBean(beanClass, null, null, null);
@@ -199,8 +207,11 @@ public class AnnotatedBeanDefinitionReader {
 	}
 
 	/**
-	 * Register a bean from the given bean class, deriving its metadata from
-	 * class-declared annotations.
+	 * Register a bean from the given bean class, deriving its metadata from class-declared annotations.
+	 *
+	 *  根据给定的class注册一个bean，并且获取类上注解定义的元数据
+	 *	此处封装的Beandifinition类型是AnnotatedGenericBeanDefinition
+	 *
 	 * @param beanClass the class of the bean
 	 * @param instanceSupplier a callback for creating an instance of the bean
 	 * (may be {@code null})
@@ -215,16 +226,16 @@ public class AnnotatedBeanDefinitionReader {
 			@Nullable Class<? extends Annotation>[] qualifiers, BeanDefinitionCustomizer... definitionCustomizers) {
 
 		AnnotatedGenericBeanDefinition abd = new AnnotatedGenericBeanDefinition(beanClass);
-		if (this.conditionEvaluator.shouldSkip(abd.getMetadata())) {
+		if (this.conditionEvaluator.shouldSkip(abd.getMetadata())) {//判断@Condition，是否需要跳过
 			return;
 		}
 
 		abd.setInstanceSupplier(instanceSupplier);
-		ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(abd);
+		ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(abd);//作用域元数据
 		abd.setScope(scopeMetadata.getScopeName());
-		String beanName = (name != null ? name : this.beanNameGenerator.generateBeanName(abd, this.registry));
+		String beanName = (name != null ? name : this.beanNameGenerator.generateBeanName(abd, this.registry));//生成beanName
 
-		AnnotationConfigUtils.processCommonDefinitionAnnotations(abd);
+		AnnotationConfigUtils.processCommonDefinitionAnnotations(abd);//处理通用的注解，给bd进行赋值，如@lazy，@Primary，@DependsOn，@Role，@Description
 		if (qualifiers != null) {
 			for (Class<? extends Annotation> qualifier : qualifiers) {
 				if (Primary.class == qualifier) {
@@ -243,7 +254,8 @@ public class AnnotatedBeanDefinitionReader {
 		}
 
 		BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(abd, beanName);
-		definitionHolder = AnnotationConfigUtils.applyScopedProxyMode(scopeMetadata, definitionHolder, this.registry);
+		definitionHolder = AnnotationConfigUtils.applyScopedProxyMode(scopeMetadata, definitionHolder, this.registry);//代理相关，jdk还是CGLIB？？没看明白
+		//将手动注册的要处理的Class的BeanDefinition注册到registry中，实际上是将BeanDefinition put到beanDefinitionMap中
 		BeanDefinitionReaderUtils.registerBeanDefinition(definitionHolder, this.registry);
 	}
 

@@ -51,7 +51,7 @@ public interface ConfigurableListableBeanFactory
 
 	/**
 	 * Ignore the given dependency interface for autowiring.
-	 * <p>This will typically be used by application contexts to register
+	 * <p>This will typically be used by application contexts to register dependencies that are resolved in other ways,
 	 * dependencies that are resolved in other ways, like BeanFactory through
 	 * BeanFactoryAware or ApplicationContext through ApplicationContextAware.
 	 * <p>By default, only the BeanFactoryAware interface is ignored.

@@ -518,16 +518,23 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		synchronized (this.startupShutdownMonitor) {
 			// Prepare this context for refreshing.
 			//准备工作，记录下容器的启动时间、标记“已启动”状态、处理配置文件中的占位符
+			//此方法不重要，只是启动阶段前的准备工作
 			prepareRefresh();
 
 			// Tell the subclass to refresh the internal bean factory.
 			// 这步比较关键，这步完成后，配置文件就会解析成一个个 Bean 定义，注册到 BeanFactory 中，
 			// 当然，这里说的 Bean 还没有初始化，只是配置信息都提取出来了，
 			// 注册也只是将这些信息都保存到了注册中心(说到底核心是一个 beanName-> beanDefinition 的 map)
+			//注意：如果我们外部容器使用的是ClassPathXmlApplicationContext，那么在此方法中会解析xml文件，加载beanDefinition
+			//		如果我们外部容器使用的是AnnotationConfigApplicationContext，那么在此方法中只会返回内部容器（DefaultListableBeanFactory），而不会做其他事情，因此在分析AnnotationConfigApplication源码流程中，此方法不重要
 			ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
 
 			// Prepare the bean factory for use in this context.
 			//设置 BeanFactory 的类加载器，添加几个 BeanPostProcessor，手动注册几个特殊的 bean
+			//在这一步中我们主要关注一点：向DefaultListableBeanFactory的beanPostProcesser中创建了一个ApplicationContextAwareProcessor
+			//在此时我们的Bean工厂中有一个BeanPostProcessor：ApplicationContextAwareProcessor，
+			// 用于回调所有实现EnvironmentAware、EmbeddedValueResolverAware、ResourceLoaderAware、ApplicationEventPublisherAware、MessageSourceAware、ApplicationContextAware接口的bean中的特定回调方法
+			//记住，此时在refresh前加入到BeanDefinitionMap中的5个spring内部BeanDefinition以及我们自己的componetClass都还没有被创建
 			prepareBeanFactory(beanFactory);
 
 			try {
@@ -622,13 +629,16 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		}
 
 		// Initialize any placeholder property sources in the context environment.
+		//空方法
 		initPropertySources();
 
 		// Validate that all properties marked as required are resolvable:
 		// see ConfigurablePropertyResolver#setRequiredProperties
+		//不重要
 		getEnvironment().validateRequiredProperties();
 
 		// Store pre-refresh ApplicationListeners...
+		//不重要
 		if (this.earlyApplicationListeners == null) {
 			this.earlyApplicationListeners = new LinkedHashSet<>(this.applicationListeners);
 		}
@@ -653,7 +663,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	/**
-	 * Tell the subclass to refresh the internal bean factory.
+	 * Tell the subclass to refresh the internal bean factory.刷新内部bean 工厂，实际上这里的内部bean工厂指的是DefaultListableBeanFactory
 	 * @return the fresh BeanFactory instance
 	 * @see #refreshBeanFactory()
 	 * @see #getBeanFactory()
@@ -684,8 +694,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		beanFactory.addPropertyEditorRegistrar(new ResourceEditorRegistrar(this, getEnvironment()));
 
 		// Configure the bean factory with context callbacks.
-		//增加一个特殊的BeanPostProcessor：ApplicationContextAwareProcessor，该实例主要作用是对所有实现Aware接口的bean进行回调操作，
-		// 如：EnvironmentAware、EmbeddedValueResolverAware、ResourceLoaderAware、ApplicationEventPublisherAware、MessageSourceAware、ApplicationContextAware
+		//增加一个特殊的BeanPostProcessor：ApplicationContextAwareProcessor，该实例主要作用是对所有实现Aware接口的bean进行回调操作，该行代码会将ApplicationContextAwareProcessor添加到DefaultListableBeanFactory的beanPostProcessor(list)中，是第一个
+		//ApplicationContextAwareProcessor的主要作用是回调所有实现EnvironmentAware、EmbeddedValueResolverAware、ResourceLoaderAware、ApplicationEventPublisherAware、MessageSourceAware、ApplicationContextAware接口的特定实现方法
 		beanFactory.addBeanPostProcessor(new ApplicationContextAwareProcessor(this));
 
 		//下面几行是如果某个bean依赖了以下几个接口的实现类，在自动装配的时候忽略它
@@ -712,7 +722,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 		// Register early post-processor for detecting inner beans as ApplicationListeners.
 		//在 bean 实例化后，如果是 ApplicationListener 的子类，那么将其添加到 listener 列表中，可以理解成：注册 事件监听器
-		//增加一个特殊的BeanPostProcessor：ApplicationListenerDetector
+		//增加一个特殊的BeanPostProcessor到DefaultListableBeanFactory的beanPostProcessors集合中：ApplicationListenerDetector
 		beanFactory.addBeanPostProcessor(new ApplicationListenerDetector(this));
 
 		// Detect a LoadTimeWeaver and prepare for weaving, if found.
@@ -725,6 +735,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			beanFactory.setTempClassLoader(new ContextTypeMatchClassLoader(beanFactory.getBeanClassLoader()));
 		}
 
+		//下面代码默认会向DefaultListableBeanFactory中实例化三个bean，放在singletonObjects这个map中，分别是：
+		//systemEnvironment--
+		//environment
+		//systemProperties
 		// Register default environment beans.
 		//如果没有定义 "environment" 这个 bean，那么 Spring 会 "手动" 注册一个单例的ConfigurableEnvironment到DefaultSingleBeanRegistry的singletonObjects中
 		if (!beanFactory.containsLocalBean(ENVIRONMENT_BEAN_NAME)) {
