@@ -128,7 +128,7 @@ class ComponentScanAnnotationParser {
 			protected boolean matchClassName(String className) {
 				return declaringClass.equals(className);
 			}
-		});
+		});//此处开始扫描包，将剩下的所有的BeanDefinition扫描出来，并且封装类型是ScannedGenericBeanDefinition，将解析出来的BeanDefinition注册到DefaultListableBeanFactory中
 		return scanner.doScan(StringUtils.toStringArray(basePackages));
 	}
 

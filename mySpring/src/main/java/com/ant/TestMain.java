@@ -8,6 +8,5 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 public class TestMain {
 	public static void main(String[] args) {
 		AnnotationConfigApplicationContext annotationConfigApplicationContext = new AnnotationConfigApplicationContext(Config.class);
-		System.out.println(annotationConfigApplicationContext.getBean(IndexService.class));
 	}
 }

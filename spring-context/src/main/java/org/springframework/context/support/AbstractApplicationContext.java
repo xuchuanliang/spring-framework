@@ -522,19 +522,24 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			prepareRefresh();
 
 			// Tell the subclass to refresh the internal bean factory.
+			//对于ClassPathXmlApplicationContext源码流程而言：
 			// 这步比较关键，这步完成后，配置文件就会解析成一个个 Bean 定义，注册到 BeanFactory 中，
 			// 当然，这里说的 Bean 还没有初始化，只是配置信息都提取出来了，
 			// 注册也只是将这些信息都保存到了注册中心(说到底核心是一个 beanName-> beanDefinition 的 map)
 			//注意：如果我们外部容器使用的是ClassPathXmlApplicationContext，那么在此方法中会解析xml文件，加载beanDefinition
+
+			//对于AnnocationConfigApplicationContext源码流程而言：
+			//这一步不关键，里面什么都没做，只是将DefaultListableBeanFactory返回
 			//		如果我们外部容器使用的是AnnotationConfigApplicationContext，那么在此方法中只会返回内部容器（DefaultListableBeanFactory），而不会做其他事情，因此在分析AnnotationConfigApplication源码流程中，此方法不重要
 			ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
 
 			// Prepare the bean factory for use in this context.
-			//设置 BeanFactory 的类加载器，添加几个 BeanPostProcessor，手动注册几个特殊的 bean
 			//在这一步中我们主要关注一点：向DefaultListableBeanFactory的beanPostProcesser中创建了一个ApplicationContextAwareProcessor
-			//在此时我们的Bean工厂中有一个BeanPostProcessor：ApplicationContextAwareProcessor，
 			// 用于回调所有实现EnvironmentAware、EmbeddedValueResolverAware、ResourceLoaderAware、ApplicationEventPublisherAware、MessageSourceAware、ApplicationContextAware接口的bean中的特定回调方法
-			//记住，此时在refresh前加入到BeanDefinitionMap中的5个spring内部BeanDefinition以及我们自己的componetClass都还没有被创建
+			//在此方法内部spring向defaultListableBeanFactory的singleObjects中手动注册了三个对象，不过不重要，分别是：systemEnvironment、environment、systemProperties
+
+			//记住，此时在refresh前加入到BeanDefinitionMap中的5个spring内部BeanDefinition以及我们自己的配置类：Config都还没有被创建
+			//即此时容器中的状态中我们主要关注的有：存在6个BeanDefinition，在beanDefinitionMap中；spring手动注册了一个BeanPostProcessor，是ApplicationContextAwareProcessor，在beanPostProcessors这个list中
 			prepareBeanFactory(beanFactory);
 
 			try {
@@ -546,7 +551,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 				// Invoke factory processors registered as beans in the context.
 				//调用 BeanFactoryPostProcessor 各个实现类的 postProcessBeanFactory(factory) 方法
-				//重要！
+
+				//当我们分析AnntationConfigApplicationContext时，此时会创建bean容器中已经注册的两个BeanFactoryPostProcessor：
 				invokeBeanFactoryPostProcessors(beanFactory);
 
 				// Register bean processors that intercept bean creation.
@@ -764,13 +770,18 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	protected void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
 	}
 
-	/**
+	/**实例化并且执行所有已经注册的BeanPactoryPostProcessor
 	 * Instantiate and invoke all registered BeanFactoryPostProcessor beans,
 	 * respecting explicit order if given.
 	 * <p>Must be called before singleton instantiation.
 	 */
 	protected void invokeBeanFactoryPostProcessors(ConfigurableListableBeanFactory beanFactory) {
-		PostProcessorRegistrationDelegate.invokeBeanFactoryPostProcessors(beanFactory, getBeanFactoryPostProcessors());
+		//该行代码比较重要
+		//会实例化前面spring注册的内部beanDefinition：
+		//
+		//
+		//
+		PostProcessorRegistrationDelegate.invokeBeanFactoryPostProcessors(beanFactory, getBeanFactoryPostProcessors());//重要
 
 		// Detect a LoadTimeWeaver and prepare for weaving, if found in the meantime
 		// (e.g. through an @Bean method registered by ConfigurationClassPostProcessor)

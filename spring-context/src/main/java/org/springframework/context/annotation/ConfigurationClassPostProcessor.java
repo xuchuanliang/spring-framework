@@ -270,7 +270,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 					logger.debug("Bean definition has already been processed as a configuration class: " + beanDef);
 				}
 			}
-			else if (ConfigurationClassUtils.checkConfigurationClassCandidate(beanDef, this.metadataReaderFactory)) {
+			else if (ConfigurationClassUtils.checkConfigurationClassCandidate(beanDef, this.metadataReaderFactory)) {//此处通过判断有@Configuration注解，来确定党店的BeanDefinition是一个配置类
 				configCandidates.add(new BeanDefinitionHolder(beanDef, beanName));
 			}
 		}
@@ -303,7 +303,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		if (this.environment == null) {
 			this.environment = new StandardEnvironment();
 		}
-
+		//解析所有的有@Configuration注解的类
 		// Parse each @Configuration class
 		ConfigurationClassParser parser = new ConfigurationClassParser(
 				this.metadataReaderFactory, this.problemReporter, this.environment,

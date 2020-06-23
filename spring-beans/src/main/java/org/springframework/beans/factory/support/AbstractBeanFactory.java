@@ -594,8 +594,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		Class<?>[] typesToMatch = (FactoryBean.class == classToMatch ?
 				new Class<?>[] {classToMatch} : new Class<?>[] {FactoryBean.class, classToMatch});
 
-		// Check decorated bean definition, if any: We assume it'll be easier
-		// to determine the decorated bean's type than the proxy's type.
+		// Check decorated bean definition, if any: We assume it'll be easier to determine the decorated bean's type than the proxy's type.
+		//
 		BeanDefinitionHolder dbd = mbd.getDecoratedDefinition();
 		if (dbd != null && !BeanFactoryUtils.isFactoryDereference(name)) {
 			RootBeanDefinition tbd = getMergedBeanDefinition(dbd.getBeanName(), dbd.getBeanDefinition(), mbd);
@@ -1698,6 +1698,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		// Now we have the bean instance, which may be a normal bean or a FactoryBean.
 		// If it's a FactoryBean, we use it to create a bean instance, unless the
 		// caller actually wants a reference to the factory.
+		//此处如果是FactoryBean就会使用getInstance方法创建，否则直接返回bean
 		if (!(beanInstance instanceof FactoryBean) || BeanFactoryUtils.isFactoryDereference(name)) {
 			return beanInstance;
 		}

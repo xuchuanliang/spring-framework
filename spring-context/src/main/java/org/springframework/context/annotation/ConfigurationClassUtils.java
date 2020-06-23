@@ -70,7 +70,7 @@ abstract class ConfigurationClassUtils {
 	}
 
 
-	/**
+	/** 检查给定的BeanDefinition是否是一个配置类(@Configuration)，如果是那么就特殊标记一下
 	 * Check whether the given bean definition is a candidate for a configuration class
 	 * (or a nested component class declared within a configuration/component class,
 	 * to be auto-registered as well), and mark it accordingly.
@@ -86,10 +86,10 @@ abstract class ConfigurationClassUtils {
 			return false;
 		}
 
-		AnnotationMetadata metadata;
+		AnnotationMetadata metadata;//此处不同类型的BeanDefinition派上了用场，我们手动注册给spring容器的class默认会给封装成AnnotatedBeanDefinition这种类型的BeanDefinition
 		if (beanDef instanceof AnnotatedBeanDefinition &&
 				className.equals(((AnnotatedBeanDefinition) beanDef).getMetadata().getClassName())) {
-			// Can reuse the pre-parsed metadata from the given BeanDefinition...
+			// Can reuse the pre-parsed metadata from the given BeanDefinition...：？？
 			metadata = ((AnnotatedBeanDefinition) beanDef).getMetadata();
 		}
 		else if (beanDef instanceof AbstractBeanDefinition && ((AbstractBeanDefinition) beanDef).hasBeanClass()) {
@@ -112,7 +112,7 @@ abstract class ConfigurationClassUtils {
 			}
 		}
 
-		if (isFullConfigurationCandidate(metadata)) {
+		if (isFullConfigurationCandidate(metadata)) {//此处判断是否有@Configuration注解
 			beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_FULL);
 		}
 		else if (isLiteConfigurationCandidate(metadata)) {

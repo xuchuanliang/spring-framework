@@ -235,7 +235,7 @@ class ConfigurationClassParser {
 				this.knownSuperclasses.values().removeIf(configClass::equals);
 			}
 		}
-
+		//递归处理configuration类及其超类层次结构
 		// Recursively process the configuration class and its superclass hierarchy.
 		SourceClass sourceClass = asSourceClass(configClass);
 		do {
@@ -247,8 +247,8 @@ class ConfigurationClassParser {
 	}
 
 	/**
-	 * Apply processing and build a complete {@link ConfigurationClass} by reading the
-	 * annotations, members and methods from the source class. This method can be called
+	 * Apply processing and build a complete {@link ConfigurationClass} by reading the annotations, //构建出来一个完整的
+	 *members and methods from the source class. This method can be called
 	 * multiple times as relevant sources are discovered.
 	 * @param configClass the configuration class being build
 	 * @param sourceClass a source class
@@ -282,7 +282,7 @@ class ConfigurationClassParser {
 		if (!componentScans.isEmpty() &&
 				!this.conditionEvaluator.shouldSkip(sourceClass.getMetadata(), ConfigurationPhase.REGISTER_BEAN)) {
 			for (AnnotationAttributes componentScan : componentScans) {
-				// The config class is annotated with @ComponentScan -> perform the scan immediately
+				// The config class is annotated with @ComponentScan -> perform the scan immediately，
 				Set<BeanDefinitionHolder> scannedBeanDefinitions =
 						this.componentScanParser.parse(componentScan, sourceClass.getMetadata().getClassName());
 				// Check the set of scanned definitions for any further config classes and parse recursively if needed

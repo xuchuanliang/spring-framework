@@ -411,7 +411,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 		}
 		return candidates;
 	}
-
+	//此处开始解析包名，并且开始扫描
 	private Set<BeanDefinition> scanCandidateComponents(String basePackage) {
 		Set<BeanDefinition> candidates = new LinkedHashSet<>();
 		try {
@@ -427,7 +427,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 				if (resource.isReadable()) {
 					try {
 						MetadataReader metadataReader = getMetadataReaderFactory().getMetadataReader(resource);
-						if (isCandidateComponent(metadataReader)) {
+						if (isCandidateComponent(metadataReader)) {//此时扫描到的bean是封装成ScannedGenericBeanDefinition这个类型
 							ScannedGenericBeanDefinition sbd = new ScannedGenericBeanDefinition(metadataReader);
 							sbd.setSource(resource);
 							if (isCandidateComponent(sbd)) {
