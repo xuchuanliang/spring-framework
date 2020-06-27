@@ -267,6 +267,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		//获取容器中目前所有的BeanDefinition的名称，实际上此时一般情况是之后spring内部定义的5个BD，我们调用registry方法传给spring容器的那一个或多个配置类
 		String[] candidateNames = registry.getBeanDefinitionNames();
 
+		//从下面的for循环其实我们可以得出一个结论：即使我们的配置类没有@Configuration注解，只是有@Component注解也是可以发挥作用的，这个bd是liteConfigurationClass（不完整的配置类），不是fullConfigurationClass（完整的配置类），两者在bd的attribute的一个属性不一样，一个是full，一个是lite
 		for (String beanName : candidateNames) {
 			BeanDefinition beanDef = registry.getBeanDefinition(beanName);
 			if (ConfigurationClassUtils.isFullConfigurationClass(beanDef) ||
@@ -319,7 +320,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		if (this.environment == null) {
 			this.environment = new StandardEnvironment();
 		}
-		//解析所有的有@Configuration注解的类
+		//实例化一个配置类解析器：ConfigurationClassParser，解析所有的有配置类
 		// Parse each @Configuration class
 		ConfigurationClassParser parser = new ConfigurationClassParser(
 				this.metadataReaderFactory, this.problemReporter, this.environment,
@@ -328,6 +329,8 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		Set<BeanDefinitionHolder> candidates = new LinkedHashSet<>(configCandidates);
 		Set<ConfigurationClass> alreadyParsed = new HashSet<>(configCandidates.size());
 		do {
+
+			//重要
 			//开始扫描包，实际上就开始处理我们的配置类
 			parser.parse(candidates);
 			parser.validate();

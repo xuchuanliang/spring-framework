@@ -101,11 +101,15 @@ final class PostProcessorRegistrationDelegate {
 			}
 			sortPostProcessors(currentRegistryProcessors, beanFactory);
 			registryProcessors.addAll(currentRegistryProcessors);
+
+			//重要
 			//此处默认首先会调用所有BeanDefinitionRegistryPostProcessor接口的实现类的postProcessBeanDefinitionRegistry方法
 			//此处实际上是ConfigurationClassPostProcessor
 			//由于BeanDefinitionRegistryPostProcessor又继承了BeanFactoryPostProcessor接口，因此后面还会调用BeanFactoryPostProcessor的postProcessBeanFactory方法
 			//由此我们可以看出实际上postProcessBeanDefinitionRegistry是在postProcessBeanFactory之前调用
-			invokeBeanDefinitionRegistryPostProcessors(currentRegistryProcessors, registry);//调用所有实现BeanDefinitionRegistryPostProcessor的BeanFactoryPostProcessor的postProcessBeanDefinitionRegistry方法
+			//调用所有实现BeanDefinitionRegistryPostProcessor的BeanFactoryPostProcessor的postProcessBeanDefinitionRegistry方法
+			//此处在ConfigurationClassPostProcessor中对注解配置类进行完成包的扫描，等等一系列操作
+			invokeBeanDefinitionRegistryPostProcessors(currentRegistryProcessors, registry);
 			currentRegistryProcessors.clear();
 
 			// Next, invoke the BeanDefinitionRegistryPostProcessors that implement Ordered.

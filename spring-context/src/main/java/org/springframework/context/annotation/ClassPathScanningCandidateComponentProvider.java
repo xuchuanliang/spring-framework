@@ -412,6 +412,12 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 		}
 		return candidates;
 	}
+
+	/**
+	 * asm读取class文件
+	 * @param basePackage
+	 * @return
+	 */
 	//此处开始解析包名，并且开始扫描
 	private Set<BeanDefinition> scanCandidateComponents(String basePackage) {
 		Set<BeanDefinition> candidates = new LinkedHashSet<>();

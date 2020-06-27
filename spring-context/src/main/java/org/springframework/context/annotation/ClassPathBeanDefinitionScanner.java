@@ -272,23 +272,33 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 		Assert.notEmpty(basePackages, "At least one base package must be specified");
 		Set<BeanDefinitionHolder> beanDefinitions = new LinkedHashSet<>();
 		for (String basePackage : basePackages) {
+
 			//扫描所有basePackage下面的.class文件，转成ScannedGenericBeanDefinition这个BeanDefinition类型
 			Set<BeanDefinition> candidates = findCandidateComponents(basePackage);
+
 			for (BeanDefinition candidate : candidates) {
+				//解析scope
 				ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(candidate);
 				candidate.setScope(scopeMetadata.getScopeName());
 				String beanName = this.beanNameGenerator.generateBeanName(candidate, this.registry);
+
+				//下面两个判断条件其实有凸显出来了不同的BeanDefinition类型所代表的不同类的作用
 				if (candidate instanceof AbstractBeanDefinition) {
+					//如果是AbstractBeanDefinition，那么就设置他的默认值如lazy，init destroy
 					postProcessBeanDefinition((AbstractBeanDefinition) candidate, beanName);
 				}
 				if (candidate instanceof AnnotatedBeanDefinition) {
+					//如果是AnnotatedBeanDefinition，那么就检查并处理常用的注解
 					AnnotationConfigUtils.processCommonDefinitionAnnotations((AnnotatedBeanDefinition) candidate);
 				}
+
 				if (checkCandidate(beanName, candidate)) {
 					BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(candidate, beanName);
 					definitionHolder =
 							AnnotationConfigUtils.applyScopedProxyMode(scopeMetadata, definitionHolder, this.registry);
 					beanDefinitions.add(definitionHolder);
+
+					//将扫描到的bd注册到registry中
 					registerBeanDefinition(definitionHolder, this.registry);
 				}
 			}

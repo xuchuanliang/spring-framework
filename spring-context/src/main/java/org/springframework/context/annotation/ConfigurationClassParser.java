@@ -168,6 +168,7 @@ class ConfigurationClassParser {
 			BeanDefinition bd = holder.getBeanDefinition();
 			try {
 				if (bd instanceof AnnotatedBeanDefinition) {
+					//重要
 					//默认我们自己添加的配置类，如Config.class
 					//此处在分析AnnotationConfigApplicationContext时，重点看这个方法
 					parse(((AnnotatedBeanDefinition) bd).getMetadata(), holder.getBeanName());
@@ -237,6 +238,8 @@ class ConfigurationClassParser {
 			return;
 		}
 
+		//处理imported情况
+		//就是处理当前这个注解类有没有被别的类import
 		ConfigurationClass existingClass = this.configurationClasses.get(configClass);
 		if (existingClass != null) {
 			if (configClass.isImported()) {
@@ -257,6 +260,7 @@ class ConfigurationClassParser {
 		// Recursively process the configuration class and its superclass hierarchy.
 		SourceClass sourceClass = asSourceClass(configClass);
 		do {
+			//重要
 			//重要：开始解析我们的配置类
 			sourceClass = doProcessConfigurationClass(configClass, sourceClass);
 		}
@@ -282,6 +286,7 @@ class ConfigurationClassParser {
 		//处理@Component
 		if (configClass.getMetadata().isAnnotated(Component.class.getName())) {
 			// Recursively process any member (nested) classes first
+			//先处理内部类
 			processMemberClasses(configClass, sourceClass);
 		}
 
@@ -308,7 +313,7 @@ class ConfigurationClassParser {
 			for (AnnotationAttributes componentScan : componentScans) {
 				// The config class is annotated with @ComponentScan -> perform the scan immediately，
 				//如果有@ComponentScan注解，则立即进行处理
-				//此行代码是开始扫描包
+				//此行代码是开始扫描包，扫描普通类
 				Set<BeanDefinitionHolder> scannedBeanDefinitions =
 						this.componentScanParser.parse(componentScan, sourceClass.getMetadata().getClassName());
 				// Check the set of scanned definitions for any further config classes and parse recursively if needed

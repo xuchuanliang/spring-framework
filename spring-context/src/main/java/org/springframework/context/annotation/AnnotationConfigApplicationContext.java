@@ -105,6 +105,10 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 		 	1.注册默认过滤器（registerDefaultFilters）
 		 	2.设置上下文环境（setEnvironment）
 		 	3.设置资源加载器（setResourceLoader）
+
+		 	这个扫描器不重要，只有在我们手动扫描时才会用这个扫描器扫描，如annotationConfigApplicationContext.scan("com.ant");才会委托使用这个扫描器
+		 	实际上spring在对@ComponentScan进行扫描时，使用的是ClassPathBeanDefinitionScanner，详情可以参见org.springframework.context.annotation.ComponentScanAnnotationParser.parse()方法
+		 	下面这个扫描器实际上是给程序员用的
 		 */
 		this.scanner = new ClassPathBeanDefinitionScanner(this);
 	}
