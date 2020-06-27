@@ -60,9 +60,12 @@ final class PostProcessorRegistrationDelegate {
 
 		if (beanFactory instanceof BeanDefinitionRegistry) {
 			BeanDefinitionRegistry registry = (BeanDefinitionRegistry) beanFactory;
+			//区分处理BeanFactoryPostProcessor和BeanDefinitionRegistryPostProcessor
+			//但是BeanDefinitionRegistryPostProcessor实现了BeanFactoryPostProcessor接口
+			//此处两个list分别存放我们自定义的BeanFactoryPostProcessor和BeanDefinitionRegistryPostProcessor
 			List<BeanFactoryPostProcessor> regularPostProcessors = new ArrayList<>();
 			List<BeanDefinitionRegistryPostProcessor> registryProcessors = new ArrayList<>();
-
+			//处理我们自己定义的BeanFactoryPostProcessor（此处的自定义的是指程序员自己定义的，并没有加@Component等注解的BeanFactoryPostProcessor，而是通过手动注册给spring的）
 			for (BeanFactoryPostProcessor postProcessor : beanFactoryPostProcessors) {
 				if (postProcessor instanceof BeanDefinitionRegistryPostProcessor) {
 					BeanDefinitionRegistryPostProcessor registryProcessor =
@@ -79,6 +82,10 @@ final class PostProcessorRegistrationDelegate {
 			//不会在这里初始化FactoryBean，我们需要保证所有的常规bean都没有被初始化，以便于将bean Factory post-processors处理他们
 			// Separate between BeanDefinitionRegistryPostProcessors that implement PriorityOrdered, Ordered, and the rest.
 			// 将实现了PriorityOrdered，Ordered以及其他的BeanDefinitionRegistryPostProcessors分开
+			//这里的currentRegistryProcessors存放的是spring自己内部实现BeanDefinitionRegistryPostProcessor接口的对象
+			//此处注意name是org.springframework.context.annotation.internalConfigurationAnnotationProcessor，类型是org.springframework.context.annotation.ConfigurationClassPostProcessor的BeanDefinition，
+			// 这个BD是在前面初始化spring中的5个内部BD中的一个。
+			//此处的list主要存放spring自己内部定义的BeanDefinitionRegistryPostProcessor
 			List<BeanDefinitionRegistryPostProcessor> currentRegistryProcessors = new ArrayList<>();
 
 			// First, invoke the BeanDefinitionRegistryPostProcessors that implement PriorityOrdered.
@@ -95,7 +102,7 @@ final class PostProcessorRegistrationDelegate {
 			sortPostProcessors(currentRegistryProcessors, beanFactory);
 			registryProcessors.addAll(currentRegistryProcessors);
 			//此处默认首先会调用所有BeanDefinitionRegistryPostProcessor接口的实现类的postProcessBeanDefinitionRegistry方法
-			//此处是ConfigurationClassPostProcessor
+			//此处实际上是ConfigurationClassPostProcessor
 			//由于BeanDefinitionRegistryPostProcessor又继承了BeanFactoryPostProcessor接口，因此后面还会调用BeanFactoryPostProcessor的postProcessBeanFactory方法
 			//由此我们可以看出实际上postProcessBeanDefinitionRegistry是在postProcessBeanFactory之前调用
 			invokeBeanDefinitionRegistryPostProcessors(currentRegistryProcessors, registry);//调用所有实现BeanDefinitionRegistryPostProcessor的BeanFactoryPostProcessor的postProcessBeanDefinitionRegistry方法

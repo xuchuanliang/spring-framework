@@ -92,7 +92,7 @@ abstract class ConfigurationClassUtils {
 			// Can reuse the pre-parsed metadata from the given BeanDefinition...：？？
 			metadata = ((AnnotatedBeanDefinition) beanDef).getMetadata();
 		}
-		else if (beanDef instanceof AbstractBeanDefinition && ((AbstractBeanDefinition) beanDef).hasBeanClass()) {
+		else if (beanDef instanceof AbstractBeanDefinition && ((AbstractBeanDefinition) beanDef).hasBeanClass()) {//此处注意，spring内部的bd一般都封装成RootBeanDefinition，我们通过继承体系可以看到RootBeanDefinition实现了AbstractBeanDefinition
 			// Check already loaded Class if present...
 			// since we possibly can't even load the class file for this Class.
 			Class<?> beanClass = ((AbstractBeanDefinition) beanDef).getBeanClass();
@@ -115,7 +115,7 @@ abstract class ConfigurationClassUtils {
 		if (isFullConfigurationCandidate(metadata)) {//此处判断是否有@Configuration注解
 			beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_FULL);
 		}
-		else if (isLiteConfigurationCandidate(metadata)) {
+		else if (isLiteConfigurationCandidate(metadata)) {//判断是否有@Component,@ComponentScan,@Import,@ImportResource,@Bean注解
 			beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_LITE);
 		}
 		else {
@@ -160,6 +160,8 @@ abstract class ConfigurationClassUtils {
 	 * @param metadata the metadata of the annotated class
 	 * @return {@code true} if the given class is to be processed as a lite
 	 * configuration class, just registering it and scanning it for {@code @Bean} methods
+	 *
+	 * 	判断是否有@Component,@ComponentScan,@Import,@ImportResource,@Bean注解
 	 */
 	public static boolean isLiteConfigurationCandidate(AnnotationMetadata metadata) {
 		// Do not consider an interface or an annotation...

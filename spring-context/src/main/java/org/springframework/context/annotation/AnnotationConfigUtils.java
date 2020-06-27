@@ -147,38 +147,54 @@ public abstract class AnnotationConfigUtils {
 	 *
 	 * 向注册器中注册所有使用annotationConfigApplicationContext相关的BeanPostProcessor
 	 *
+	 * 此处方法主要为我们的beanFactory提供一些能力，如排序的能力、延迟加载的能力
+	 *
 	 *
 	 */
 	public static Set<BeanDefinitionHolder> registerAnnotationConfigProcessors(
 			BeanDefinitionRegistry registry, @Nullable Object source) {
-
+		//根据registry获取DefaultListableBeanFactory，此处registry只有两种：DefaultListableBeanFactory或者GenericApplicationContext
 		DefaultListableBeanFactory beanFactory = unwrapDefaultListableBeanFactory(registry);
 		if (beanFactory != null) {
-			if (!(beanFactory.getDependencyComparator() instanceof AnnotationAwareOrderComparator)) {//创建默认的依赖比较器
+			if (!(beanFactory.getDependencyComparator() instanceof AnnotationAwareOrderComparator)) {
+				//为BeanFactory提供处理排序的能力：创建默认的依赖比较器，支持@Priority和@Ordered
 				beanFactory.setDependencyComparator(AnnotationAwareOrderComparator.INSTANCE);
 			}
-			if (!(beanFactory.getAutowireCandidateResolver() instanceof ContextAnnotationAutowireCandidateResolver)) {//提供对@Lazy的支持
+			if (!(beanFactory.getAutowireCandidateResolver() instanceof ContextAnnotationAutowireCandidateResolver)) {
+				//为BeanFactory提供延迟加载的能力：提供对@Lazy的支持，提供延迟加载的功能
 				beanFactory.setAutowireCandidateResolver(new ContextAnnotationAutowireCandidateResolver());
 			}
 		}
 
 		Set<BeanDefinitionHolder> beanDefs = new LinkedHashSet<>(8);
 		//判断register是否包含名称为org.springframework.context.annotation.internalConfigurationAnnotationProcessor的BeanDefinition
+		//默认spring中不存在，则将ConfigurationClassPostProcessor作为spring内部类注册到DefaultListableBeanFactory中
 		if (!registry.containsBeanDefinition(CONFIGURATION_ANNOTATION_PROCESSOR_BEAN_NAME)) {
-			RootBeanDefinition def = new RootBeanDefinition(ConfigurationClassPostProcessor.class);//创建类型为ConfigurationClassPostProcessor的RootBeanDefinition，该RootBeanDefinition的Role是ROLE_INFRASTRUCTURE，表示该bd是spring内部定义使用的
+			//创建类型为ConfigurationClassPostProcessor的RootBeanDefinition，该RootBeanDefinition的Role是ROLE_INFRASTRUCTURE，表示该bd是spring内部定义使用的
+			//注意，ConfigurationClassPostProcessor实现类BeanDefinitionRegistryPostProcessor接口
+			//BeanDefinitionRegistryPostProcessor实现了BeanFactoryPostProcessor接口
+			//则ConfigurationClassPostProcessor最终同时实现了BeanFactoryPostProcessor和BeanDefinitionRegistryPostProcessor接口
+			RootBeanDefinition def = new RootBeanDefinition(ConfigurationClassPostProcessor.class);
 			def.setSource(source);
+			//注意，在registerPostProcessor方法中默认给BeanDefinition的Role设置了一下BeanDefinition.ROLE_INFRASTRUCTURE，即将该bean设置标识为spring内部bean
 			beanDefs.add(registerPostProcessor(registry, def, CONFIGURATION_ANNOTATION_PROCESSOR_BEAN_NAME));
 		}
+
 		//判断注册器中是否存在名称为org.springframework.context.annotation.internalAutowiredAnnotationProcessor的BeanDefinition
+		//默认spring中不存在，则将AutowiredAnnotationBeanPostProcessor作为spring内部的BeanDefinition注册到容器中
 		if (!registry.containsBeanDefinition(AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME)) {
-			RootBeanDefinition def = new RootBeanDefinition(AutowiredAnnotationBeanPostProcessor.class);//创建类型为AutowiredAnnotationBeanPostProcessor的RootBeanDefinition，该RootBeanDefinition的Role是ROLE_INFRASTRUCTURE，表示该bd是spring内部定义使用的
+			//创建类型为AutowiredAnnotationBeanPostProcessor的RootBeanDefinition，该RootBeanDefinition的Role是ROLE_INFRASTRUCTURE，表示该bd是spring内部定义使用的
+			//注意，AutowiredAnnotationBeanPostProcessor最终实现了BeanPostProcessor
+			RootBeanDefinition def = new RootBeanDefinition(AutowiredAnnotationBeanPostProcessor.class);
 			def.setSource(source);
 			beanDefs.add(registerPostProcessor(registry, def, AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
 		}
 		//判断注册器中是否存在名称为org.springframework.context.annotation.internalCommonAnnotationProcessor的BeanDefinition
 		// Check for JSR-250 support, and if present add the CommonAnnotationBeanPostProcessor.
 		if (jsr250Present && !registry.containsBeanDefinition(COMMON_ANNOTATION_PROCESSOR_BEAN_NAME)) {
-			RootBeanDefinition def = new RootBeanDefinition(CommonAnnotationBeanPostProcessor.class);//创建类型为CommonAnnotationBeanPostProcessor的RootBeanDefinition，role是ROLE_INFRASTRUCTURE，该bean是spring内部使用的bean
+			//创建类型为CommonAnnotationBeanPostProcessor的RootBeanDefinition，role是ROLE_INFRASTRUCTURE，该bean是spring内部使用的bean
+			//注意CommonAnnotationBeanPostProcessor最终实现了BeanPostProcessor和BeanFactoryAware
+			RootBeanDefinition def = new RootBeanDefinition(CommonAnnotationBeanPostProcessor.class);
 			def.setSource(source);
 			beanDefs.add(registerPostProcessor(registry, def, COMMON_ANNOTATION_PROCESSOR_BEAN_NAME));
 		}
@@ -199,12 +215,14 @@ public abstract class AnnotationConfigUtils {
 		}
 		//向注册器中注入org.springframework.context.event.internalEventListenerProcessor
 		if (!registry.containsBeanDefinition(EVENT_LISTENER_PROCESSOR_BEAN_NAME)) {
+			//EventListenerMethodProcessor最终实现了 ApplicationContextAware和 BeanFactoryPostProcessor
 			RootBeanDefinition def = new RootBeanDefinition(EventListenerMethodProcessor.class);
 			def.setSource(source);
 			beanDefs.add(registerPostProcessor(registry, def, EVENT_LISTENER_PROCESSOR_BEAN_NAME));
 		}
-
+		//向容器中注入org.springframework.context.event.internalEventListenerFactory
 		if (!registry.containsBeanDefinition(EVENT_LISTENER_FACTORY_BEAN_NAME)) {
+			//DefaultEventListenerFactory最终实现了EventListenerFactory
 			RootBeanDefinition def = new RootBeanDefinition(DefaultEventListenerFactory.class);
 			def.setSource(source);
 			beanDefs.add(registerPostProcessor(registry, def, EVENT_LISTENER_FACTORY_BEAN_NAME));
@@ -215,8 +233,8 @@ public abstract class AnnotationConfigUtils {
 
 	private static BeanDefinitionHolder registerPostProcessor(
 			BeanDefinitionRegistry registry, RootBeanDefinition definition, String beanName) {
-
-		definition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);//表示该beanDefinition是spring内部注册使用的BeanDefinition
+		//表示该beanDefinition是spring内部注册使用的BeanDefinition
+		definition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 		registry.registerBeanDefinition(beanName, definition);
 		return new BeanDefinitionHolder(definition, beanName);
 	}

@@ -42,9 +42,13 @@ import org.springframework.util.Assert;
 /**
  * Generic ApplicationContext implementation that holds a single internal
  * {@link org.springframework.beans.factory.support.DefaultListableBeanFactory}
- * instance and does not assume a specific bean definition format. Implements
+ * instance and does not assume a specific bean definition format.
+ * GednericApplicationContext持有一个通用的Application实现：单例的DefaultListableBeanFactory实例
+ *
+ * Implements
  * the {@link org.springframework.beans.factory.support.BeanDefinitionRegistry}
  * interface in order to allow for applying any bean definition readers to it.
+ * 实现了BeanDefinitionRegistry接口以便于应用任何bean definition读取器
  *
  * <p>Typical usage is to register a variety of bean definitions via the
  * {@link org.springframework.beans.factory.support.BeanDefinitionRegistry}

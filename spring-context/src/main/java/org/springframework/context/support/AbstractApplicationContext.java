@@ -544,6 +544,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 			try {
 				// Allows post-processing of the bean factory in context subclasses.
+				//ClassPathXmlApplicationContext：
 				//这里是提供给子类的扩展点，到这里的时候，所有的 Bean 都加载、注册完成了，但是都还没有初始化
 				//具体的子类可以在这步的时候添加一些特殊的 BeanFactoryPostProcessor 的实现类或做点什么事
 				//重要！
@@ -551,8 +552,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 				// Invoke factory processors registered as beans in the context.
 				//调用 BeanFactoryPostProcessor 各个实现类的 postProcessBeanFactory(factory) 方法
-
+				//AnnotationConfigApplicationContext(重要):
 				//当我们分析AnntationConfigApplicationContext时，此时会创建bean容器中已经注册的两个BeanFactoryPostProcessor：
+				//1.name是org.springframework.context.annotation.internalConfigurationAnnotationProcessor，类型是org.springframework.context.annotation.ConfigurationClassPostProcessor
+				//2.name是org.springframework.context.event.internalEventListenerProcessor，类型是org.springframework.context.event.EventListenerMethodProcessor
 				invokeBeanFactoryPostProcessors(beanFactory);
 
 				// Register bean processors that intercept bean creation.
@@ -695,8 +698,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		// 这里设置为加载当前 ApplicationContext 类的类加载器
 		beanFactory.setBeanClassLoader(getClassLoader());
 
+		//添加一个Bean表达式解析器，为了能够让BeanFactory有解析Spel表达式的能力
 		//由于默认beanFactory默认没有BeanExpressionResolver，增加一个默认的BeanExpressionResolver用于解析#{...}表达式（supporting "#{...}" expressions in a Unified EL compatible style.）
 		beanFactory.setBeanExpressionResolver(new StandardBeanExpressionResolver(beanFactory.getBeanClassLoader()));
+
 		beanFactory.addPropertyEditorRegistrar(new ResourceEditorRegistrar(this, getEnvironment()));
 
 		// Configure the bean factory with context callbacks.
@@ -780,7 +785,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		//会实例化前面spring注册的内部beanDefinition：
 		//
 		//
-		//
+		//获取自定义的BeanFactoryPostProcessor（此处的自定义的是指程序员自己定义的，并没有加@Component等注解的BeanFactoryPostProcessor，而是通过手动注册给spring的，手动是指调用annotationConfigApplicationContext.addBeanFactoryPostProcessor();方法添加）
 		PostProcessorRegistrationDelegate.invokeBeanFactoryPostProcessors(beanFactory, getBeanFactoryPostProcessors());//重要
 
 		// Detect a LoadTimeWeaver and prepare for weaving, if found in the meantime

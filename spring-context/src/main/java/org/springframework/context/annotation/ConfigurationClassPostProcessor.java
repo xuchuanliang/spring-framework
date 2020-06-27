@@ -215,6 +215,9 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 
 	/**
 	 * Derive further bean definitions from the configuration classes in the registry.
+	 * BeanDefinitionRegistryPostProcessor接口定义的方法，插手容器实例化过程
+	 * 此处是主要对@Configuration，@Component，@ComponentScan，@Import，@ImportResource进行处理
+	 * 对ComponentScan的bean进行扫描
 	 */
 	@Override
 	public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) {
@@ -257,23 +260,36 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	/**
 	 * Build and validate a configuration model based on the registry of
 	 * {@link Configuration} classes.
+	 * 处是主要对@Configuration，@Component，@ComponentScan，@Import，@ImportResource进行处理
 	 */
 	public void processConfigBeanDefinitions(BeanDefinitionRegistry registry) {
 		List<BeanDefinitionHolder> configCandidates = new ArrayList<>();
+		//获取容器中目前所有的BeanDefinition的名称，实际上此时一般情况是之后spring内部定义的5个BD，我们调用registry方法传给spring容器的那一个或多个配置类
 		String[] candidateNames = registry.getBeanDefinitionNames();
 
 		for (String beanName : candidateNames) {
 			BeanDefinition beanDef = registry.getBeanDefinition(beanName);
 			if (ConfigurationClassUtils.isFullConfigurationClass(beanDef) ||
 					ConfigurationClassUtils.isLiteConfigurationClass(beanDef)) {
+				//如果BeanDefinition中的configurationClass属性为full或lite，则意味着已经处理过，则跳过
+				//fullConfiguration表示的是这个类上有@Configuration注解
+				//liteConfiguration表示这个类上有无@Configuration注解，但是有@Import，@ImportResource，@Component，@ComponentScan，@Bean注解
+				//如果有上面的那些注解，则会开始解析，例如如果有@ComponentScan，则会去扫描
 				if (logger.isDebugEnabled()) {
 					logger.debug("Bean definition has already been processed as a configuration class: " + beanDef);
 				}
-			}
-			else if (ConfigurationClassUtils.checkConfigurationClassCandidate(beanDef, this.metadataReaderFactory)) {//此处通过判断有@Configuration注解，来确定党店的BeanDefinition是一个配置类
+			}else if (ConfigurationClassUtils.checkConfigurationClassCandidate(beanDef, this.metadataReaderFactory)) {
+				//此处通过判断有@Configuration注解，来确定当前的BeanDefinition是一个配置类，同时如果没有@Configuration那么判断是否有@Component，@ComponentScan,@Import,@ImportResource
+				//如果没有@Configuration注解但是有@Component，@ComponentScan,@Import,@ImportResource，则也会认为是一个配置类
+				//即此方法是判断这个bd是不是一个配置类，如果是，那么把它放在configCandidates这个集合中，供后面使用
+				//注意：ConfigurationClassUtils.checkConfigurationClassCandidate(beanDef, this.metadataReaderFactory)里面的逻辑也不少，可以跟进看一下
 				configCandidates.add(new BeanDefinitionHolder(beanDef, beanName));
 			}
 		}
+
+
+
+
 
 		// Return immediately if no @Configuration classes were found
 		if (configCandidates.isEmpty()) {
@@ -312,6 +328,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		Set<BeanDefinitionHolder> candidates = new LinkedHashSet<>(configCandidates);
 		Set<ConfigurationClass> alreadyParsed = new HashSet<>(configCandidates.size());
 		do {
+			//开始扫描包，实际上就开始处理我们的配置类
 			parser.parse(candidates);
 			parser.validate();
 

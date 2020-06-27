@@ -312,11 +312,14 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 
 	/**
 	 * Get the role hint for this {@code BeanDefinition}. The role hint
-	 * provides the frameworks as well as tools with an indication of
-	 * the role and importance of a particular {@code BeanDefinition}.
+	 * provides the frameworks as well as tools with an indication of the role
+	 * and importance of a particular {@code BeanDefinition}.
 	 * @see #ROLE_APPLICATION
 	 * @see #ROLE_SUPPORT
 	 * @see #ROLE_INFRASTRUCTURE
+	 *
+	 * 获取当前BeanDefinition的角色类型，角色类型为框架提供指导作用，对于BeanDefinition的作用比较重要
+	 *
 	 */
 	int getRole();
 
