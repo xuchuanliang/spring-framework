@@ -331,7 +331,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		do {
 
 			//重要
-			//开始扫描包，实际上就开始处理我们的配置类
+			//开始扫描包，实际上就开始处理我们的配置类，在处理配置类的过程中，将扫描到的普通类bd注册到spring容器中
 			parser.parse(candidates);
 			parser.validate();
 
@@ -344,6 +344,8 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 						registry, this.sourceExtractor, this.resourceLoader, this.environment,
 						this.importBeanNameGenerator, parser.getImportRegistry());
 			}
+
+			//重要，将parser.parse(candidates)这一步中的特殊类bd注册到spring容器中，如@Import中引入的类，加了@Configuration注解的配置类等等
 			this.reader.loadBeanDefinitions(configClasses);
 			alreadyParsed.addAll(configClasses);
 

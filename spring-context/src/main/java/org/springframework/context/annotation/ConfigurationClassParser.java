@@ -314,6 +314,7 @@ class ConfigurationClassParser {
 				// The config class is annotated with @ComponentScan -> perform the scan immediately，
 				//如果有@ComponentScan注解，则立即进行处理
 				//此行代码是开始扫描包，扫描普通类
+				//此处扫描出所有的@Compnent,@Service,@Controller,@Repositry
 				Set<BeanDefinitionHolder> scannedBeanDefinitions =
 						this.componentScanParser.parse(componentScan, sourceClass.getMetadata().getClassName());
 				// Check the set of scanned definitions for any further config classes and parse recursively if needed
@@ -332,6 +333,10 @@ class ConfigurationClassParser {
 		// Process any @Import annotations
 		//处理@Import注解
 		//跟进去我们可以看到实际上会根基@Import中的class类型 处理三种类型：分别是ImportSelector，ImportBeanDefinitionRegistrar和普通class类型
+		/**
+		 * getImports(sourceClass)这个方法：会递归遍历sourceClass(即配置类)上面的所有注解，并且如果注解上有注解也会继续递归调用，直到拿到所有的@Import注解中的值，@Import中的值是一个CLass类型
+		 * 然后调用processImports方法，在processImports方法中，会对三种类型的Class做特殊处理：1.ImportSelector.class；2.ImportBeanDefinitionRegistrar.class；3.其他类型
+		 */
 		processImports(configClass, sourceClass, getImports(sourceClass), true);
 
 		// Process any @ImportResource annotations
@@ -591,6 +596,7 @@ class ConfigurationClassParser {
 					if (candidate.isAssignable(ImportSelector.class)) {
 						// Candidate class is an ImportSelector -> delegate to it to determine imports
 						Class<?> candidateClass = candidate.loadClass();
+						//此处将我们@Import(xxx.class)的xxx.class反射成为一个对象，类型是ImportSelector
 						ImportSelector selector = BeanUtils.instantiateClass(candidateClass, ImportSelector.class);
 						ParserStrategyUtils.invokeAwareMethods(
 								selector, this.environment, this.resourceLoader, this.registry);
@@ -599,6 +605,9 @@ class ConfigurationClassParser {
 						}
 						else {
 							String[] importClassNames = selector.selectImports(currentSourceClass.getMetadata());
+							//如果是ImportSelector类型，此处调用ImportSelector的selectImports()方法，获取我们需要注册的所有字符串，，并且将这些字符串加载成Class，
+							// 然后将加载后获得的Class作为参数继续递归调用processImports方法，此时注意，如果这里加载的Class仍然后实现了ImportSelector接口的类，
+							// 那么仍然会继续递归直到所有的类不再实现ImportSelector接口为止，即一般最终是普通类，最终跳转到else的processConfigurationClass(candidate.asConfigClass(configClass))方法
 							Collection<SourceClass> importSourceClasses = asSourceClasses(importClassNames);
 							processImports(configClass, currentSourceClass, importSourceClasses, false);
 						}
@@ -618,6 +627,7 @@ class ConfigurationClassParser {
 						// process it as an @Configuration class
 						this.importStack.registerImport(
 								currentSourceClass.getMetadata(), candidate.getMetadata().getClassName());
+						//此处是处理配置类，包含解析该类上的@Configuration注解，@Import注解，@PropertySource注解等等
 						processConfigurationClass(candidate.asConfigClass(configClass));
 					}
 				}

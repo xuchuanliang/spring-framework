@@ -1,11 +1,7 @@
 package com.ant.config;
 
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.ImportResource;
+import com.ant.EnableAnt;
 
-@Configuration
-@ComponentScan("com.ant")
-@ImportResource("classpath:spring.xml")
+@EnableAnt
 public class Config {
 }
