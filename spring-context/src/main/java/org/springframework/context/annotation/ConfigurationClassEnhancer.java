@@ -106,6 +106,7 @@ class ConfigurationClassEnhancer {
 			}
 			return configClass;
 		}
+		//使用cglib对目标类型创建一个集成目标类型的子类型
 		Class<?> enhancedClass = createClass(newEnhancer(configClass, classLoader));
 		if (logger.isTraceEnabled()) {
 			logger.trace(String.format("Successfully enhanced %s; enhanced class name is: %s",
@@ -117,13 +118,66 @@ class ConfigurationClassEnhancer {
 	/**
 	 * Creates a new CGLIB {@link Enhancer} instance.
 	 */
+	/**
+	 * 创建一个新的CGLIB的Enhancer对象
+	 * @param configSuperClass
+	 * @param classLoader
+	 * @return
+	 */
 	private Enhancer newEnhancer(Class<?> configSuperClass, @Nullable ClassLoader classLoader) {
 		Enhancer enhancer = new Enhancer();
+		//因为CGLIB是基于继承的，此处是设置代理类的父类
 		enhancer.setSuperclass(configSuperClass);
+
+		//增强接口，便于判断，表示一个类已经被增强了
+		//此时设置的接口EnhancedConfiguration，实际上实现了BeanFactoryAware接口，也就是该对象会在实例化实例化设置完属性后且在初始化方法之前被回调
+		//在BeanFactoryAware被回调后，会将BeanFactory当做参数传回来
 		enhancer.setInterfaces(new Class<?>[] {EnhancedConfiguration.class});
 		enhancer.setUseFactory(false);
 		enhancer.setNamingPolicy(SpringNamingPolicy.INSTANCE);
+
+		//BeanFactoryAwareGeneratorStrategy是一个生成策略
+		//主要为生成的CGLIB类中添加一个成员变量：$$beanFactory
+		//同时基于上方设置的接口EnhancedConfiguration的父接口BeanFactoryAware中的setFactory方法，
+		//设置此变量的值为当前Context中的beanFactory，这样一来我们这个cglib代理的对象就有了beanFactory
+		//有了beanFactory就能获得对象，而不用去通过方法获得对象了，因为通过方法获得对象不能控制其过程
+		//该beanFactory的作用是在this调用时拦截该调用，并直接在beanFactory中获得目标bean
+		//例如以下方法两个类来说明此问题
+		/*
+			public class Index{
+				public Index(){
+					System.out.println("init);
+				}
+			}
+
+			@Configuration
+			public class Config{
+				@Bean
+				public Index index(){
+					return new Index();
+				}
+				@Bean
+				public Index index2(){
+					new Index();
+					return new Index2();
+				}
+			}
+			public class Config{
+				@Bean
+				public Index index(){
+					return new Index();
+				}
+				@Bean
+				public Index index2(){
+					new Index();
+					return new Index2();
+				}
+			}
+		 */
+		//上方两个配置对象在spring容器初始化过程中，有@Configuration注解的配置类，Index构造函数中的init只会打印一次，而无该注解的会打印两次
+		//此处就与这个地方的CGLIB代理有比较大的关系
 		enhancer.setStrategy(new BeanFactoryAwareGeneratorStrategy(classLoader));
+		//过滤方法，主要针对上方注释中的情况，不能每次都去new一个新的Index()对象
 		enhancer.setCallbackFilter(CALLBACK_FILTER);
 		enhancer.setCallbackTypes(CALLBACK_FILTER.getCallbackTypes());
 		return enhancer;

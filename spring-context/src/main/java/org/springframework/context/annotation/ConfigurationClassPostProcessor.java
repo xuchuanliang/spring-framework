@@ -253,7 +253,12 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 			processConfigBeanDefinitions((BeanDefinitionRegistry) beanFactory);
 		}
 
+		//重要：此处会对系统中的所有标记有@Configuration注解的BeanDefinition进行特殊处理，即基于该类的类型产生一个继承了该类的子类代理对象，即产生cglib代理，
+		//最终将cglib产生的代理类型替换掉BeanDefinition中的class类型，
+		//也就是在此处将标记有@Configuration注解的类替换成代理类的类型
 		enhanceConfigurationClasses(beanFactory);
+
+		//此处向spring容器中新增了类型为ImportAwareBeanPostProcessor的BeanPostProcessor
 		beanFactory.addBeanPostProcessor(new ImportAwareBeanPostProcessor(beanFactory));
 	}
 
@@ -389,9 +394,14 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	 * Candidate status is determined by BeanDefinition attribute metadata.
 	 * @see ConfigurationClassEnhancer
 	 */
+	/**
+	 * 此处是查找所有的full配置类（即有@Configuration注解的配置类），使用cglib代理生成一个该配置类的子类，将该类的BeanDefinition中的class信息换成cglib生成的代理子类，那么接下来创建的对象也就是一个代理对象了
+	 */
 	public void enhanceConfigurationClasses(ConfigurableListableBeanFactory beanFactory) {
 		Map<String, AbstractBeanDefinition> configBeanDefs = new LinkedHashMap<>();
 		for (String beanName : beanFactory.getBeanDefinitionNames()) {
+			//此处需要注意，在PostProcessorRegistrationDelegate.invokeBeanFactoryPostProcessors的分析过程中，我们在处理配置类时，如果有@Configuration注解则被标记成为一个full配置类，如果只有@import，@Compnent等几种注解情况会被标记成为lite配置类
+			//此处判断是否是full配置类，如果是full配置类，则会将该BeanDefinition放入configBeanDefs  map中，以便后面特殊处理
 			BeanDefinition beanDef = beanFactory.getBeanDefinition(beanName);
 			if (ConfigurationClassUtils.isFullConfigurationClass(beanDef)) {
 				if (!(beanDef instanceof AbstractBeanDefinition)) {
@@ -414,6 +424,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 
 		ConfigurationClassEnhancer enhancer = new ConfigurationClassEnhancer();
 		for (Map.Entry<String, AbstractBeanDefinition> entry : configBeanDefs.entrySet()) {
+			//遍历获取所有加了@Configuration注解的BeanDefinition，
 			AbstractBeanDefinition beanDef = entry.getValue();
 			// If a @Configuration class gets proxied, always proxy the target class
 			beanDef.setAttribute(AutoProxyUtils.PRESERVE_TARGET_CLASS_ATTRIBUTE, Boolean.TRUE);

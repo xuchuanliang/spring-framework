@@ -38,5 +38,6 @@ public class TestMain {
 		annotationConfigApplicationContext.register(Config.class);
 		annotationConfigApplicationContext.refresh();
 		annotationConfigApplicationContext.getBean(IndexDao.class).test();
+//		System.out.println(annotationConfigApplicationContext.getBean("entity"));
 	}
 }
