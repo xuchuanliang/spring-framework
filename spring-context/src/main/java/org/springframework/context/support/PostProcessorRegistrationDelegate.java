@@ -52,6 +52,13 @@ final class PostProcessorRegistrationDelegate {
 	}
 
 
+	/**
+	 * 这里会处理实现了两种接口的类：
+	 * 1.实现了BeanDefinitionRegistryPostProcessor接口的类
+	 * 2.实现了BeanFactoryPostProcessor接口的类
+	 * @param beanFactory
+	 * @param beanFactoryPostProcessors
+	 */
 	public static void invokeBeanFactoryPostProcessors(
 			ConfigurableListableBeanFactory beanFactory, List<BeanFactoryPostProcessor> beanFactoryPostProcessors) {
 
@@ -93,8 +100,9 @@ final class PostProcessorRegistrationDelegate {
 					beanFactory.getBeanNamesForType(BeanDefinitionRegistryPostProcessor.class, true, false);
 			for (String ppName : postProcessorNames) {
 				if (beanFactory.isTypeMatch(ppName, PriorityOrdered.class)) {
-					//此处创建了一个BeanFactoryPostProcessor：org.springframework.context.annotation.ConfigurationClassPostProcessor
+					//注意：此处创建了一个BeanFactoryPostProcessor：org.springframework.context.annotation.ConfigurationClassPostProcessor
 					//将新创建的BeanFactoryPostProcessor存入到currentRegistryProcessors 这个list中，这个list只存放BeanDefinitionRegistryPostProcessor
+					//此处就是把我们的org.springframework.context.annotation.ConfigurationClassPostProcessor这个BD实例化称为了一个Bean，通过beanFactory.getBean(ppName, BeanDefinitionRegistryPostProcessor.class)方法完成
 					currentRegistryProcessors.add(beanFactory.getBean(ppName, BeanDefinitionRegistryPostProcessor.class));
 					processedBeans.add(ppName);
 				}
@@ -144,8 +152,11 @@ final class PostProcessorRegistrationDelegate {
 			}
 
 			// Now, invoke the postProcessBeanFactory callback of all processors handled so far.
-			//先执行完BeanDefinitionRegistryPostProcessor的接口方法之后，再执行BeanFactoryPostPorcessor的接口方法
+			//先执行完BeanDefinitionRegistryPostProcessor的接口方法之后，再执行BeanFactoryPostProcessor的接口方法
+			//注意
+			//在执行ConfigurationClassPostProcessor作为BeanFactoryPostProcesser的回调方法时，在该方法中针对@Configuration注解的类生成代理对象
 			invokeBeanFactoryPostProcessors(registryProcessors, beanFactory);
+
 			invokeBeanFactoryPostProcessors(regularPostProcessors, beanFactory);
 		}
 

@@ -74,6 +74,8 @@ class ConfigurationClassEnhancer {
 
 	// The callbacks to use. Note that these callbacks must be stateless.
 	private static final Callback[] CALLBACKS = new Callback[] {
+			//增强方法，主要控制bean的作用域
+			//主要针对我们前面注释例子中的，主要是控制不要在index2()中调用调用index()方法时，每次都去new一个Index
 			new BeanMethodInterceptor(),
 			new BeanFactoryAwareMethodInterceptor(),
 			NoOp.INSTANCE
@@ -95,6 +97,9 @@ class ConfigurationClassEnhancer {
 	 * @return the enhanced subclass
 	 */
 	public Class<?> enhance(Class<?> configClass, @Nullable ClassLoader classLoader) {
+
+		//判断是否被代理过了，从后面的代码中我们可以知道当被代理后就会实现EnhancedConfiguration这个接口，
+		// 这里就是通过判断是否已经实现了EnhancedConfiguration接口来判断这个类是否已经被代理过了
 		if (EnhancedConfiguration.class.isAssignableFrom(configClass)) {
 			if (logger.isDebugEnabled()) {
 				logger.debug(String.format("Ignoring request to enhance %s as it has " +
@@ -106,7 +111,10 @@ class ConfigurationClassEnhancer {
 			}
 			return configClass;
 		}
-		//使用cglib对目标类型创建一个集成目标类型的子类型
+
+		//重要 使用cglib对目标类型创建一个集成目标类型的子类型
+		//ewEnhancer(configClass, classLoader)，创建一个cglib的Enhancer
+		// createClass(Enhancer enhancer) ，使用Enhancer创建一个代理类class，并且注册一个回调方法
 		Class<?> enhancedClass = createClass(newEnhancer(configClass, classLoader));
 		if (logger.isTraceEnabled()) {
 			logger.trace(String.format("Successfully enhanced %s; enhanced class name is: %s",
@@ -119,7 +127,22 @@ class ConfigurationClassEnhancer {
 	 * Creates a new CGLIB {@link Enhancer} instance.
 	 */
 	/**
-	 * 创建一个新的CGLIB的Enhancer对象
+	 * 创建一个新的CGLIB的Enhancer对象，从下方代码中我们能推断出该Enhancer针对我们的Config类产生的cglib代理类的基本代码结构如下：
+	 * public Config$$EnhancerBySpringCGLIB$$d9e4b893 extend Config implement EnhancedConfiguration{
+	 *     private BeanFactory $$beanFactory;
+	 *     	@Bean
+*          	public Index index(){
+	 * 			return new Index();
+	 *      }
+	 *      @Bean
+	 *      public Index index2(){
+	 * 			Index i = index();
+	 * 			return new Index2();
+	 *      }
+	 * }
+	 *
+	 * 参照博客 https://www.cnblogs.com/dengrong/p/10622594.html，我们可以获取到spring针对我们的Config生成的代理类的class文件
+	 *
 	 * @param configSuperClass
 	 * @param classLoader
 	 * @return
@@ -130,8 +153,9 @@ class ConfigurationClassEnhancer {
 		enhancer.setSuperclass(configSuperClass);
 
 		//增强接口，便于判断，表示一个类已经被增强了
-		//此时设置的接口EnhancedConfiguration，实际上实现了BeanFactoryAware接口，也就是该对象会在实例化实例化设置完属性后且在初始化方法之前被回调
-		//在BeanFactoryAware被回调后，会将BeanFactory当做参数传回来
+		//此时设置的接口EnhancedConfiguration，实际上nhancedConfiguration实现了BeanFactoryAware接口，
+		// 也就是该对象会在实例化设置完属性后且在初始化方法之前被回调
+		//即setBeanFactory()被回调后，会将当前BeanFactory当做参数传回来
 		enhancer.setInterfaces(new Class<?>[] {EnhancedConfiguration.class});
 		enhancer.setUseFactory(false);
 		enhancer.setNamingPolicy(SpringNamingPolicy.INSTANCE);
@@ -140,7 +164,9 @@ class ConfigurationClassEnhancer {
 		//主要为生成的CGLIB类中添加一个成员变量：$$beanFactory
 		//同时基于上方设置的接口EnhancedConfiguration的父接口BeanFactoryAware中的setFactory方法，
 		//设置此变量的值为当前Context中的beanFactory，这样一来我们这个cglib代理的对象就有了beanFactory
-		//有了beanFactory就能获得对象，而不用去通过方法获得对象了，因为通过方法获得对象不能控制其过程
+		//有了beanFactory就能获得对象，
+		// 那么对于下方代码中，而不用去总是通过加了@Bean方法获得对象了，而是先判断beanFactory有没有要创建的对象，如果有就通过beanFactory返回，
+		// 否则就通过加了@Bean注解的方法创建，然后将创建的对象放到spring容器当中，这样spring就能在下方代码的index2()方法的index()调用时，及时的从beanFactory中取到Index对象，从而实现Index只会被实例化一次
 		//该beanFactory的作用是在this调用时拦截该调用，并直接在beanFactory中获得目标bean
 		//例如以下方法两个类来说明此问题
 		/*
@@ -158,7 +184,7 @@ class ConfigurationClassEnhancer {
 				}
 				@Bean
 				public Index index2(){
-					new Index();
+					Index i = index();
 					return new Index2();
 				}
 			}
@@ -169,15 +195,18 @@ class ConfigurationClassEnhancer {
 				}
 				@Bean
 				public Index index2(){
-					new Index();
+					Index i = index();
 					return new Index2();
 				}
 			}
 		 */
 		//上方两个配置对象在spring容器初始化过程中，有@Configuration注解的配置类，Index构造函数中的init只会打印一次，而无该注解的会打印两次
 		//此处就与这个地方的CGLIB代理有比较大的关系
+		//BeanFactoryAwareGeneratorStrategy的作用是在当前的增强类中增加了一个属性：$$beanFactory，用来存储当前beanFactory的引用
 		enhancer.setStrategy(new BeanFactoryAwareGeneratorStrategy(classLoader));
+
 		//过滤方法，主要针对上方注释中的情况，不能每次都去new一个新的Index()对象
+		//注意此处需要仔细研究一下里面的CallbackFilter，回调过滤器，后面有时间也需要研究一下cglib代理，自己模仿实现一下，了解一下cglib代理的实现以及执行流程
 		enhancer.setCallbackFilter(CALLBACK_FILTER);
 		enhancer.setCallbackTypes(CALLBACK_FILTER.getCallbackTypes());
 		return enhancer;
@@ -370,6 +399,9 @@ class ConfigurationClassEnhancer {
 		public Object intercept(Object enhancedConfigInstance, Method beanMethod, Object[] beanMethodArgs,
 					MethodProxy cglibMethodProxy) throws Throwable {
 
+			//获取当前bean工厂
+			//enhancedConfigInstance 代理
+			//通过enhancedConfigInstance中cglib生成的成员变量$$beanFactory获得beanFactory
 			ConfigurableBeanFactory beanFactory = getBeanFactory(enhancedConfigInstance);
 			String beanName = BeanAnnotationHelper.determineBeanNameFor(beanMethod);
 
@@ -400,6 +432,8 @@ class ConfigurationClassEnhancer {
 				}
 			}
 
+			//重要
+			//判断执行的方法和调用的方法是不是同一个
 			if (isCurrentlyInvokedFactoryMethod(beanMethod)) {
 				// The factory is calling the bean method in order to instantiate and register the bean
 				// (i.e. via a getBean() call) -> invoke the super implementation of the method to actually

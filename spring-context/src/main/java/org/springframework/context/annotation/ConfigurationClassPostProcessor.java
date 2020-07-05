@@ -236,8 +236,9 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	}
 
 	/**
-	 * Prepare the Configuration classes for servicing bean requests at runtime
-	 * by replacing them with CGLIB-enhanced subclasses.
+	 * Prepare the Configuration classes for servicing bean requests at runtime by replacing them with CGLIB-enhanced subclasses.
+	 *
+	 * 注意：在运行时使用CGLIB增强的子类替换掉配置类(即有@Configuration注解的类)，用来服务请求
 	 */
 	@Override
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
@@ -399,6 +400,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	 */
 	public void enhanceConfigurationClasses(ConfigurableListableBeanFactory beanFactory) {
 		Map<String, AbstractBeanDefinition> configBeanDefs = new LinkedHashMap<>();
+		//循环遍历beanFactory中的所有bd，获取到是配置类的bd(标记有@Configuration注解的类，会被标记为fullConfigurationClass)
 		for (String beanName : beanFactory.getBeanDefinitionNames()) {
 			//此处需要注意，在PostProcessorRegistrationDelegate.invokeBeanFactoryPostProcessors的分析过程中，我们在处理配置类时，如果有@Configuration注解则被标记成为一个full配置类，如果只有@import，@Compnent等几种注解情况会被标记成为lite配置类
 			//此处判断是否是full配置类，如果是full配置类，则会将该BeanDefinition放入configBeanDefs  map中，以便后面特殊处理
@@ -422,6 +424,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 			return;
 		}
 
+		//对获取到的所有标有@Configuration注解的bd进行CGLIB动态代理增强，并将代理类的class将该bd中的原始class替换
 		ConfigurationClassEnhancer enhancer = new ConfigurationClassEnhancer();
 		for (Map.Entry<String, AbstractBeanDefinition> entry : configBeanDefs.entrySet()) {
 			//遍历获取所有加了@Configuration注解的BeanDefinition，
@@ -432,6 +435,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 				// Set enhanced subclass of the user-specified bean class
 				Class<?> configClass = beanDef.resolveBeanClass(this.beanClassLoader);
 				if (configClass != null) {
+					//重要：产生cglib增加class
 					Class<?> enhancedClass = enhancer.enhance(configClass, this.beanClassLoader);
 					if (configClass != enhancedClass) {
 						if (logger.isTraceEnabled()) {
