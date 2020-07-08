@@ -352,6 +352,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 			}
 
 			//重要，将parser.parse(candidates)这一步中的特殊类bd注册到spring容器中，如@Import中引入的类，加了@Configuration注解的配置类等等
+			//注意将@Import中继承ImportBeanDefinitionRegistrar接口的实现类放到了importRegistry中，此处取出并处理
 			this.reader.loadBeanDefinitions(configClasses);
 			alreadyParsed.addAll(configClasses);
 
