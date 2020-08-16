@@ -1,6 +1,0 @@
-调用AnnotationConfigApplicationContext构造方法，传入配置类：Config.class
-org.springframework.context.annotation.AnnotationConfigApplicationContext.AnnotationConfigApplicationContext(java.lang.Class<?>...)
-
-    org.springframework.context.annotation.AnnotationConfigApplicationContext.AnnotationConfigApplicationContext()
-    org.springframework.context.annotation.AnnotationConfigApplicationContext.register
-    org.springframework.context.support.AbstractApplicationContext.refresh
