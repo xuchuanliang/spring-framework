@@ -274,8 +274,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		}else {
 			// Fail if we're already creating this bean instance:
 			// We're assumably within a circular reference.
-			//创建过了此 beanName 的 prototype 类型的 bean，那么抛异常，
-			//往往是因为陷入了循环引用
+			//判断是否是原型（prototype），如果是原型，不应当在初始化的时候创建，，则抛出异常
 			if (isPrototypeCurrentlyInCreation(beanName)) {
 				throw new BeanCurrentlyInCreationException(beanName);
 			}
@@ -310,6 +309,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 			if (!typeCheckOnly) {
 				//如果typeCheckOnly为false，则将当前beanName存入alreadyCreated缓存中
+				//添加到alreadyCreated set集合当中，表示他已经创建过一次
 				markBeanAsCreated(beanName);
 			}
 

@@ -117,6 +117,9 @@ class ConstructorResolver {
 	public BeanWrapper autowireConstructor(String beanName, RootBeanDefinition mbd,
 			@Nullable Constructor<?>[] chosenCtors, @Nullable Object[] explicitArgs) {
 
+		/**
+		 * 创建一个Bean实例包装器，BeanWrapperImpl
+		 */
 		BeanWrapperImpl bw = new BeanWrapperImpl();
 		this.beanFactory.initBeanWrapper(bw);
 
@@ -130,6 +133,11 @@ class ConstructorResolver {
 		else {
 			Object[] argsToResolve = null;
 			synchronized (mbd.constructorArgumentLock) {
+				/**
+				 * 获取已解析的构造方法
+				 * 一般不会有，因为构造方法一般会提供一个
+				 * 除非有多个，那么才会存在已经解析完成的构造方法
+				 */
 				constructorToUse = (Constructor<?>) mbd.resolvedConstructorOrFactoryMethod;
 				if (constructorToUse != null && mbd.constructorArgumentsResolved) {
 					// Found a cached constructor...

@@ -59,8 +59,15 @@ public class TestMain {
 		 *
 		 *  BeanPostProcessor：实现该接口之后，可以插手spring容器实例化bean的过程，在spring容器对bean实例化之前以及之后，会回调所有的的BeanPostProcessor接口
 		 *  的实现方法，经典应用场景有：bean的生命周期回调，如@PostConstruct、@PreDestroy；AOP代理
+		 *
+		 *
+		 *  2020年8月4日 20:40:00 2018-12-6(34)-spring Aop过程、bean实例化过程 -子路
+		 *  2020年8月6日 21:31:43 D:\学习教程\鲁班学院java架构师VIP2019课程一期\03.框架应用和源码专题(三)\2018-12-9(35)-spring源码解析，构造方法如何实例化对象的  -子路
+		 *
+		 *
+		 *
 		 */
-		AnnotationConfigApplicationContext annotationConfigApplicationContext = new AnnotationConfigApplicationContext(Config.class);
+		AnnotationConfigApplicationContext annotationConfigApplicationContext = new AnnotationConfigApplicationContext();
 		annotationConfigApplicationContext.register(Config.class);
 		annotationConfigApplicationContext.refresh();
 		annotationConfigApplicationContext.getBean(IndexDao.class).test();
