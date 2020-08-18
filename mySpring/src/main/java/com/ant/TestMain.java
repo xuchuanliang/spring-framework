@@ -5,6 +5,7 @@ import com.ant.config.Config;
 import com.ant.service.IndexDao;
 import com.ant.service2.Entity2;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 
 public class TestMain {
 	public static void main(String[] args) throws InterruptedException {
@@ -65,8 +66,5 @@ public class TestMain {
 		annotationConfigApplicationContext.refresh();
 		annotationConfigApplicationContext.getBean(IndexDao.class).test();
 		System.out.println(annotationConfigApplicationContext.getBean(Entity2.class));
-
-//		Enhancer enhancer = new Enhancer();
-//		enhancer.setSuperclass(IndexDao.class);
 	}
 }
