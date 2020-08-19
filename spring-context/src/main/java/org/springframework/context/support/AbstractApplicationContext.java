@@ -550,6 +550,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				//重要！
 				postProcessBeanFactory(beanFactory);
 
+				//2020年8月19日 20:40:15
 				// Invoke factory processors registered as beans in the context.
 				//调用 BeanFactoryPostProcessor 各个实现类的 postProcessBeanFactory(factory) 方法
 				//AnnotationConfigApplicationContext(重要):
