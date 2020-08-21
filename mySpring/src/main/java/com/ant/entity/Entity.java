@@ -1,4 +1,4 @@
-package com.ant;
+package com.ant.entity;
 
 public class Entity {
 	private String name;

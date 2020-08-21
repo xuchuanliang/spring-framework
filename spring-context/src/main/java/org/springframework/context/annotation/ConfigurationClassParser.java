@@ -261,7 +261,7 @@ class ConfigurationClassParser {
 		SourceClass sourceClass = asSourceClass(configClass);
 		do {
 			//重要
-			//重要：开始解析我们的配置类
+			//重要：开始解析我们的配置类；实际上是将我们的配置类封装成为SourceClass然后进行解析，此处的返回值是指当前配置类如果存在父类的情况下，方法体会将其父类封装为SourceClass，然后回到这里会继续解析该配置类的父类
 			sourceClass = doProcessConfigurationClass(configClass, sourceClass);
 		}
 		while (sourceClass != null);
@@ -291,8 +291,8 @@ class ConfigurationClassParser {
 		}
 
 		// Process any @PropertySource annotations
-		//处理所有@PropertySource注解
-		for (AnnotationAttributes propertySource : AnnotationConfigUtils.attributesForRepeatable(
+		//处理所有@PropertySource注解，包含如果有自定义注解中包含@PropertySource也会被AnnotationConfigUtils.attributesForRepeatable()解析到，实际上该方法就是根据注解再解析注解上的注解，直到最终解析到java原生注解为止
+ 		for (AnnotationAttributes propertySource : AnnotationConfigUtils.attributesForRepeatable(
 				sourceClass.getMetadata(), PropertySources.class,
 				org.springframework.context.annotation.PropertySource.class)) {
 			if (this.environment instanceof ConfigurableEnvironment) {
