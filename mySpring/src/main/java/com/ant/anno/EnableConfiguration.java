@@ -1,9 +1,7 @@
 package com.ant.anno;
 
-import com.ant.config.MyImportBeanDefinitionRegistrar;
-import com.ant.config.MyImportSelector;
-import com.ant.entity.Body;
-import org.springframework.context.annotation.*;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
 
 import java.lang.annotation.*;
 
@@ -12,9 +10,10 @@ import java.lang.annotation.*;
 @Target(ElementType.TYPE)
 @Inherited
 @Configuration
-@ComponentScan("com.ant")
-@PropertySource("classpath:my.properties")
-@Import({Body.class, MyImportSelector.class, MyImportBeanDefinitionRegistrar.class})
-@ImportResource("classpath:Spring.xml")
+//@ComponentScan("com.ant")
+@ComponentScan("com.ant.service")
+//@PropertySource("classpath:my.properties")
+//@Import({Body.class, MyImportSelector.class, MyImportBeanDefinitionRegistrar.class})
+//@ImportResource("classpath:Spring.xml")
 public @interface EnableConfiguration {
 }
