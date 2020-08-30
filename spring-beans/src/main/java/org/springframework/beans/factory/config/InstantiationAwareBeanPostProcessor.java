@@ -75,6 +75,11 @@ public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor {
 		return null;
 	}
 
+	@Override
+	default Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+		return null;
+	}
+
 	/**
 	 * Perform operations after the bean has been instantiated, via a constructor or factory method,
 	 * but before Spring property population (from explicit properties or autowiring) occurs.
