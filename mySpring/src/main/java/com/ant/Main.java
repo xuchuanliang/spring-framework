@@ -30,6 +30,5 @@ public class Main {
 		EnableConfiguration annotation = child.getClass().getAnnotation(EnableConfiguration.class);
 		Annotation[] annotations = child.getClass().getAnnotations();
 		System.err.println(annotation);
-
 	}
 }
