@@ -264,7 +264,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		this.ignoredDependencyTypes.add(type);
 	}
 
-	/**
+	/**在注入的时候忽略给定的接口实现类。是应用程序上下文需要通过另外一种方式解析依赖的时候常用的一种方式。
 	 * Ignore the given dependency interface for autowiring.
 	 * <p>This will typically be used by application contexts to register
 	 * dependencies that are resolved in other ways, like BeanFactory through
