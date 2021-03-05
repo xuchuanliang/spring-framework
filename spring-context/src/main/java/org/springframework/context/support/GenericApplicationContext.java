@@ -43,12 +43,12 @@ import org.springframework.util.Assert;
  * Generic ApplicationContext implementation that holds a single internal
  * {@link org.springframework.beans.factory.support.DefaultListableBeanFactory}
  * instance and does not assume a specific bean definition format.
- * GednericApplicationContext持有一个通用的Application实现：单例的DefaultListableBeanFactory实例
+ * GenericApplicationContext是一个通用的ApplicationContext实现，持有了一个单例的DefaultListableBeanFactory实例的引用，
  *
  * Implements
  * the {@link org.springframework.beans.factory.support.BeanDefinitionRegistry}
  * interface in order to allow for applying any bean definition readers to it.
- * 实现了BeanDefinitionRegistry接口以便于应用任何bean definition读取器
+ * 实现了BeanDefinitionRegistry接口以便于可以提供任意bean definition的注册
  *
  * <p>Typical usage is to register a variety of bean definitions via the
  * {@link org.springframework.beans.factory.support.BeanDefinitionRegistry}
@@ -56,14 +56,14 @@ import org.springframework.util.Assert;
  * with application context semantics (handling
  * {@link org.springframework.context.ApplicationContextAware}, auto-detecting
  * {@link org.springframework.beans.factory.config.BeanFactoryPostProcessor BeanFactoryPostProcessors},
- * etc).
+ * etc). 典型的用法是使用BeanDefinitionRegistry接口来注册各种各样的bean definition，然后调用refresh()方法使用应用程序上下文初始化这些bean，例如使用ApplicationContextAware处理，使用BeanFactoryPostProcessor自动发现等
  *
  * <p>In contrast to other ApplicationContext implementations that create a new
  * internal BeanFactory instance for each refresh, the internal BeanFactory of
  * this context is available right from the start, to be able to register bean
  * definitions on it. {@link #refresh()} may only be called once.
- *
- * <p>Usage example:
+ *	于其他的一些ApplicationContext实现每次refresh都会创建一个新的BeanFactory实例不同的是，在GenericApplicationContext内部的BeanFactory在启动的时候是立即可用的，这样就可以及时的将bean definition注册进来，refresh()方法只能被调用1次。
+ * <p>Usage example: 使用案例
  *
  * <pre class="code">
  * GenericApplicationContext ctx = new GenericApplicationContext();
@@ -77,13 +77,13 @@ import org.springframework.util.Assert;
  * ...</pre>
  *
  * For the typical case of XML bean definitions, simply use
- * {@link ClassPathXmlApplicationContext} or {@link FileSystemXmlApplicationContext},
- * which are easier to set up - but less flexible, since you can just use standard
+ * {@link ClassPathXmlApplicationContext} or {@link FileSystemXmlApplicationContext}, 对于使用XML定义bean definition的情况，可以简单的使用ClassPathXmlApplicationContext或者FileSystemXmlApplicationContext能够更简单的设置，但是灵活性会降低
+ * which are easier to set up - but less flexible, since you can just use standard 你只可以使用标准的资源定位方式加载XML bean definitions，而不是混合的bean difinition格式。web环境可以使用XmlWebApplicationContext
  * resource locations for XML bean definitions, rather than mixing arbitrary bean
  * definition formats. The equivalent in a web environment is
  * {@link org.springframework.web.context.support.XmlWebApplicationContext}.
  *
- * <p>For custom application context implementations that are supposed to read
+ * <p>For custom application context implementations that are supposed to read 对于自定义的可以支持读取特殊beanDefinition格式的applicationContext实现，可以考虑继承AbstractRefreshableApplicationContext类
  * special bean definition formats in a refreshable manner, consider deriving
  * from the {@link AbstractRefreshableApplicationContext} base class.
  *
@@ -110,7 +110,7 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	/**
 	 * Create a new GenericApplicationContext.
 	 * @see #registerBeanDefinition
-	 * @see #refresh
+	 * @see #refresh  通用的ApplicationContext，创建时直接创建一个DefaultListableBeanFactory实现
 	 */
 	public GenericApplicationContext() {
 		this.beanFactory = new DefaultListableBeanFactory();

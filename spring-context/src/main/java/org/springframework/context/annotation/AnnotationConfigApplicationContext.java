@@ -30,17 +30,17 @@ import org.springframework.util.Assert;
  * Standalone application context, accepting <em>component classes</em> as input &mdash;
  * in particular {@link Configuration @Configuration}-annotated classes, but also plain
  * {@link org.springframework.stereotype.Component @Component} types and JSR-330 compliant
- * classes using {@code javax.inject} annotations.
+ * classes using {@code javax.inject} annotations.  AnnotationConfigApplicationContext是一个单例的应用程序上下文，接受使用@Configuration或者@Component注解标注的类作为参数
  *
  * <p>Allows for registering classes one by one using {@link #register(Class...)}
- * as well as for classpath scanning using {@link #scan(String...)}.
+ * as well as for classpath scanning using {@link #scan(String...)}. 允许使用register方法向容器中注册bean，作用与扫描器的scan扫描bean作用一样
  *
  * <p>In case of multiple {@code @Configuration} classes, {@link Bean @Bean} methods
  * defined in later classes will override those defined in earlier classes. This can
  * be leveraged to deliberately override certain bean definitions via an extra
- * {@code @Configuration} class.
+ * {@code @Configuration} class.如果有多个使用@Configuration标记的类，@Bean标记的方法返回的类会覆盖定义的更早的类。可以利用这一点特点，通过而外的代码有意的覆盖某些bean的定义
  *
- * <p>See {@link Configuration @Configuration}'s javadoc for usage examples.
+ * <p>See {@link Configuration @Configuration}'s javadoc for usage examples. 查看@Configuration的javadoc 查看使用案例
  *
  * @author Juergen Hoeller
  * @author Chris Beams

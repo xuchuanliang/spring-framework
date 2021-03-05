@@ -5,13 +5,12 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class SecondService {
+	@Autowired
 	private FirstService firstService;
 	public SecondService(){
 		System.out.println("=================secondService");
 	}
-
-	public void setFirstService(FirstService firstService) {
-		System.out.println("=================>"+firstService);
-		this.firstService = firstService;
+	public void test(){
+		System.out.print("secondService.test()============="+firstService);
 	}
 }
