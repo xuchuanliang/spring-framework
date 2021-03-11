@@ -69,14 +69,21 @@ import static org.springframework.context.annotation.AnnotationConfigUtils.CONFI
  * {@link BeanFactoryPostProcessor} used for bootstrapping processing of
  * {@link Configuration @Configuration} classes.
  *
+ * 在容器启动阶段，用来处理@Configuration注解的beanFactoryPostProcessor
+ *
  * <p>Registered by default when using {@code <context:annotation-config/>} or
  * {@code <context:component-scan/>}. Otherwise, may be declared manually as
  * with any other BeanFactoryPostProcessor.
+ *
+ * 当使用<context:annotation-config/>或者<context:component-scan/>标签时（包含@Configuration或@ComponentScan），该后置处理器会被自动注册到容器中，
+ * 否则，可以像声明其他BeanFactoryPostProcessor一样声明使用
  *
  * <p>This post processor is priority-ordered as it is important that any
  * {@link Bean} methods declared in {@code @Configuration} classes have
  * their corresponding bean definitions registered before any other
  * {@link BeanFactoryPostProcessor} executes.
+ *
+ * 这个后置处理器是按照优先级排序的，任何在@Configuration注释的类中的@Bean方法在其他BeanPostProcessor执行前都要注册对应的beanDefinition
  *
  * @author Chris Beams
  * @author Juergen Hoeller

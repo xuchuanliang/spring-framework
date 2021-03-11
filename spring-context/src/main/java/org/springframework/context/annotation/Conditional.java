@@ -25,7 +25,7 @@ import java.lang.annotation.Target;
 /**
  * Indicates that a component is only eligible for registration when all
  * {@linkplain #value specified conditions} match.
- *
+ *	表示这是一个通过value属性匹配合格的component，能够注册到注册器中
  * <p>A <em>condition</em> is any state that can be determined programmatically
  * before the bean definition is due to be registered (see {@link Condition} for details).
  *

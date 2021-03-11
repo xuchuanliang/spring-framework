@@ -22,21 +22,30 @@ import org.springframework.beans.BeansException;
  * Allows for custom modification of an application context's bean definitions,
  * adapting the bean property values of the context's underlying bean factory.
  * 允许自定义修改应用上下文的BeanDefinition
+ * 使用上下文内部的beanFactory修改bean的属性值
  *
  * <p>Application contexts can auto-detect BeanFactoryPostProcessor beans in
  * their bean definitions and apply them before any other beans get created.
- * spring应用上下文会自动检测所有BeanDefinition中的BeanFactoryPostProcessor的实现类，并且在创建其他bean之前调用这些BeanFactoryPostProcessor
+ *
+ * spring应用上下文会自动检测所有BeanDefinition中的BeanFactoryPostProcessor的实现类，
+ * 并且在创建其他bean之前调用这些BeanFactoryPostProcessor
+ *
  *
  * <p>Useful for custom config files targeted at system administrators that
  * override bean properties configured in the application context.
+ *
+ *	系统管理员自定义配置文件并且在应用程序上下文中覆盖或重写bean的属性时，实现BeanFactoryPostProcessor接口非常有用
  *
  * <p>See PropertyResourceConfigurer and its concrete implementations for out-of-the-box solutions that address such configuration needs.
  *	查看PropertyResourceConfigurer，他是BeanFactoryPostProcessor的一个实现类，为了解决配置问题的开箱即用的解决方案
  *
  * <p>A BeanFactoryPostProcessor may interact with and modify bean definitions, but never bean instances.
- *	BeanFactoryPostProcessor可能影响或者修改BeanDefinition，但是不会影响bean的实例
+ *
+ *  BeanFactoryPostProcessor可能影响或者修改BeanDefinition，但是不会影响bean的实例
+ *
  * Doing so may cause premature bean instantiation, violating the container and causing unintended side-effects.
- * 这样做可能会导致bean的提前实例化、破坏容器并产生意外的副作用
+ * 如果影响bean实例，则可能会导致bean的提前实例化、破坏容器并产生意外的副作用
+ *
  * If bean instance interaction is required, consider implementing
  * {@link BeanPostProcessor} instead.
  * 如果需要对Bean的实例进行操作，可以实现BeanPostProcessor接口

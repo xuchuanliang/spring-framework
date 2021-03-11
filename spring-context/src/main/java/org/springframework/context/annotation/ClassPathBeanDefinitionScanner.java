@@ -40,15 +40,22 @@ import org.springframework.util.PatternMatchUtils;
  * registering corresponding bean definitions with a given registry ({@code BeanFactory}
  * or {@code ApplicationContext}).
  *
- * <p>Candidate classes are detected through configurable type filters. The
+ *一个基于类路径（classpath）扫描bean definition的扫描器
+ *将beanDefinition注册到给定的注册器中如BeanFactory或ApplicationContext
+ *
+ * <p>Candidate classes are detected through configurable type filters.
+ *通过配置的类型过滤规则发现需要被扫描的class
+ * The
  * default filters include classes that are annotated with Spring's
  * {@link org.springframework.stereotype.Component @Component},
  * {@link org.springframework.stereotype.Repository @Repository},
  * {@link org.springframework.stereotype.Service @Service}, or
  * {@link org.springframework.stereotype.Controller @Controller} stereotype.
+ *默认的过滤类的规则包含在类上使用@Component、@Repository、@Service、@Controller注解
  *
  * <p>Also supports Java EE 6's {@link javax.annotation.ManagedBean} and
  * JSR-330's {@link javax.inject.Named} annotations, if available.
+ *也支持java ee6的@ManageBean以及@Named注解
  *
  * @author Mark Fisher
  * @author Juergen Hoeller

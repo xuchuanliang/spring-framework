@@ -2,9 +2,6 @@ package com.test2;
 
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.context.annotation.Bean;
-
-import java.beans.ConstructorProperties;
 
 public class Main {
 	public static void main(String[] args) {

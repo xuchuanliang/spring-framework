@@ -1663,7 +1663,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		}
 	}
 
-	/**
+	/**检查beanFactory 的bean创建行为是否已经开始，也就是说在此期间有任何bean被标记为创建
 	 * Check whether this factory's bean creation phase already started,
 	 * i.e. whether any bean has been marked as created in the meantime.
 	 * @since 4.2.2

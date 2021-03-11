@@ -131,6 +131,7 @@ public abstract class AnnotationConfigUtils {
 
 	/**
 	 * Register all relevant annotation post processors in the given registry.
+	 *	向给定的注册器：registry中注册注解相关的后置处理器（post processor）
 	 * @param registry the registry to operate on
 	 */
 	public static void registerAnnotationConfigProcessors(BeanDefinitionRegistry registry) {
@@ -168,7 +169,8 @@ public abstract class AnnotationConfigUtils {
 
 		Set<BeanDefinitionHolder> beanDefs = new LinkedHashSet<>(8);
 		//判断register是否包含名称为org.springframework.context.annotation.internalConfigurationAnnotationProcessor的BeanDefinition
-		//默认spring中不存在，则将ConfigurationClassPostProcessor作为spring内部类注册到DefaultListableBeanFactory中
+		//默认spring中不存在，则将ConfigurationClassPostProcessor作为spring内部类注册到DefaultListableBeanFactory中，ConfigurationClassPostProcessor是
+		//ConfigurationClassPostProcessor是用来处理@Configuration注解、@Bean注解相关内容
 		if (!registry.containsBeanDefinition(CONFIGURATION_ANNOTATION_PROCESSOR_BEAN_NAME)) {
 			//创建类型为ConfigurationClassPostProcessor的RootBeanDefinition，该RootBeanDefinition的Role是ROLE_INFRASTRUCTURE，表示该bd是spring内部定义使用的
 			//注意，ConfigurationClassPostProcessor实现类BeanDefinitionRegistryPostProcessor接口
@@ -182,6 +184,7 @@ public abstract class AnnotationConfigUtils {
 
 		//判断注册器中是否存在名称为org.springframework.context.annotation.internalAutowiredAnnotationProcessor的BeanDefinition
 		//默认spring中不存在，则将AutowiredAnnotationBeanPostProcessor作为spring内部的BeanDefinition注册到容器中
+		//AutowiredAnnotationBeanPostProcessor用来处理@Autowire，@Inject，@Value，@Lookup注解
 		if (!registry.containsBeanDefinition(AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME)) {
 			//创建类型为AutowiredAnnotationBeanPostProcessor的RootBeanDefinition，该RootBeanDefinition的Role是ROLE_INFRASTRUCTURE，表示该bd是spring内部定义使用的
 			//注意，AutowiredAnnotationBeanPostProcessor最终实现了BeanPostProcessor

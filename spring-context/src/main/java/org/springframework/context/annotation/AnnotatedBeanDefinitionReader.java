@@ -42,7 +42,7 @@ import org.springframework.util.Assert;
  * 见名知意，被注解的BeanDefinition读取器，与ClassPathBeanDefinitionScanner一样，专门用来读取被注解的BeanDefinition
  *
  *
- *
+ *	作用就是将给定的class转成BeanDefinition相关信息，并注册到spring的容器中，一般是beanFactory或者ApplicationContext
  *
  * @author Juergen Hoeller
  * @author Chris Beams
@@ -67,6 +67,10 @@ public class AnnotatedBeanDefinitionReader {
 	 * <p>If the registry is {@link EnvironmentCapable}, e.g. is an {@code ApplicationContext},
 	 * the {@link Environment} will be inherited, otherwise a new
 	 * {@link StandardEnvironment} will be created and used.
+	 *
+	 * 为给定的注册器创建一个AnnotatedBeanDefinitionReader，如果这个注册器是一个EnvironmentCapable接口的实现，例如ApplicationContext
+	 * 将会继承他的Environment，否则就会创建并使用一个标准的Environment（StandardEnvironment）
+	 *
 	 * @param registry the {@code BeanFactory} to load bean definitions into,
 	 * in the form of a {@code BeanDefinitionRegistry}
 	 * @see #AnnotatedBeanDefinitionReader(BeanDefinitionRegistry, Environment)
