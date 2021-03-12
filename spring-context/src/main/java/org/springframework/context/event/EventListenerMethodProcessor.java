@@ -53,6 +53,8 @@ import org.springframework.util.CollectionUtils;
  * Implements {@link BeanFactoryPostProcessor} (as of 5.1) primarily for early retrieval,
  * avoiding AOP checks for this processor bean and its {@link EventListenerFactory} delegates.
  *
+ * 处理@EventListener注解，实现了BeanFactoryPostProcessor用于提前检测，避免AOP以及EventListenerFactory对这个bean进行处理
+ *
  * @author Stephane Nicoll
  * @author Juergen Hoeller
  * @since 4.2

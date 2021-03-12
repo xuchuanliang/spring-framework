@@ -28,11 +28,15 @@ import org.springframework.util.Assert;
  * class, adding support for annotation metadata exposed through the
  * {@link AnnotatedBeanDefinition} interface.
  *
- * <p>This GenericBeanDefinition variant is mainly useful for testing code that expects
+ * GenericBeanDefinition的扩展类，通过实现了AnnotatedBeanDefinition接口新增了对注解元数据的支持
+ *
+ * <p>This GenericBeanDefinition variant is mainly useful for testing code that expects to operate on an AnnotatedBeanDefinition,
  * to operate on an AnnotatedBeanDefinition, for example strategy implementations
  * in Spring's component scanning support (where the default definition class is
  * {@link org.springframework.context.annotation.ScannedGenericBeanDefinition},
  * which also implements the AnnotatedBeanDefinition interface).
+ *
+ * 这个GenericBeanDefinition的扩展主要是为了操作AnnotatedBeanDefinition,例如，实现了对spring 组件扫描的策略
  *
  * @author Juergen Hoeller
  * @author Chris Beams
@@ -54,7 +58,9 @@ public class AnnotatedGenericBeanDefinition extends GenericBeanDefinition implem
 	 * @param beanClass the loaded bean class
 	 */
 	public AnnotatedGenericBeanDefinition(Class<?> beanClass) {
+		//设置当前BD的class类型
 		setBeanClass(beanClass);
+		//创建当前class的元数据信息为一个StandardAnnotationMetadata类型
 		this.metadata = new StandardAnnotationMetadata(beanClass, true);
 	}
 

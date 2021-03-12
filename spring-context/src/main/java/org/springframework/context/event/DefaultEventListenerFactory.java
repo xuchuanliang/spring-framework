@@ -25,6 +25,8 @@ import org.springframework.core.Ordered;
  * Default {@link EventListenerFactory} implementation that supports the
  * regular {@link EventListener} annotation.
  *
+ * 默认的EventListenerFactory实现类，用来支持@EventListener注解
+ *
  * <p>Used as "catch-all" implementation by default.
  *
  * @author Stephane Nicoll

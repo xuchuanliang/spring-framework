@@ -194,6 +194,7 @@ public abstract class AnnotationConfigUtils {
 		}
 		//判断注册器中是否存在名称为org.springframework.context.annotation.internalCommonAnnotationProcessor的BeanDefinition
 		// Check for JSR-250 support, and if present add the CommonAnnotationBeanPostProcessor.
+		//CommonAnnotationBeanPostProcessor用来处理@Resource、@PostConstruct、@PreDestroy等jdk相关注解
 		if (jsr250Present && !registry.containsBeanDefinition(COMMON_ANNOTATION_PROCESSOR_BEAN_NAME)) {
 			//创建类型为CommonAnnotationBeanPostProcessor的RootBeanDefinition，role是ROLE_INFRASTRUCTURE，该bean是spring内部使用的bean
 			//注意CommonAnnotationBeanPostProcessor最终实现了BeanPostProcessor和BeanFactoryAware
@@ -203,6 +204,7 @@ public abstract class AnnotationConfigUtils {
 		}
 
 		// Check for JPA support, and if present add the PersistenceAnnotationBeanPostProcessor.
+		//PersistenceAnnotationBeanPostProcessor是用来处理jpa相关注解
 		if (jpaPresent && !registry.containsBeanDefinition(PERSISTENCE_ANNOTATION_PROCESSOR_BEAN_NAME)) {
 			RootBeanDefinition def = new RootBeanDefinition();
 			try {

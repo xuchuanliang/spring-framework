@@ -226,12 +226,12 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 * to fully process the new classes.
 	 *
 	 * 注册一个或多个需要被处理的组件类
-	 * 必须在注册之后调用refresh()方法
+	 * 注意：必须在注册之后调用refresh()方法，以至于应用上下文可以完整的处理新的类
 	 *
 	 * 最终委托给BeanDefinition注册器：AnnotatedBeanDefinitionReader，调用其注册方法
 	 *
 	 * @param componentClasses one or more component classes &mdash; for example,
-	 * {@link Configuration @Configuration} classes
+	 * {@link Configuration @Configuration} classes  一个或多个组件类，例如标记有@Configuration注解的组件类
 	 * @see #scan(String...)
 	 * @see #refresh()
 	 */

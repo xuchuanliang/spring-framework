@@ -5,9 +5,9 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 
 public class Main {
 	public static void main(String[] args) {
-		AnnotationConfigApplicationContext annotationConfigApplicationContext = new AnnotationConfigApplicationContext(Config.class);
-		DefaultListableBeanFactory defaultListableBeanFactory = (DefaultListableBeanFactory) annotationConfigApplicationContext.getBeanFactory();
-		defaultListableBeanFactory.getBean(SecondService.class).test();
+		AnnotationConfigApplicationContext annotationConfigApplicationContext = new AnnotationConfigApplicationContext();
+		annotationConfigApplicationContext.register(Config.class);
+		annotationConfigApplicationContext.refresh();
 	}
 
 

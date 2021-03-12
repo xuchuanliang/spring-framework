@@ -138,7 +138,8 @@ public class AnnotatedBeanDefinitionReader {
 	 * Register one or more component classes to be processed.
 	 * <p>Calls to {@code register} are idempotent; adding the same component class more than once has no additional effect.
 	 * 注册一个或多个需要处理的组件类，循环调用registerBean方法，
-	 * 多次添加相同的组件类不会产生重复的效果
+	 * 对register方法的调用是幂等的，即多次调用的结果是一样的；
+	 * 	多次添加相同的组件类不会产生重复的效果
 	 * @param componentClasses one or more component classes,
 	 * e.g. {@link Configuration @Configuration} classes
 	 */
@@ -149,11 +150,10 @@ public class AnnotatedBeanDefinitionReader {
 	}
 
 	/**
-	 * Register a bean from the given bean class, deriving its metadata from
+	 * Register a bean from the given bean class, deriving its metadata from class-declared annotations.
 	 * class-declared annotations.
 	 * @param beanClass the class of the bean
-	 *
-	 *  委托调用
+	 * 从给定的bean类注册bean，从类声明的注释派生其元数据。
 	 */
 	public void registerBean(Class<?> beanClass) {
 		doRegisterBean(beanClass, null, null, null);
@@ -230,6 +230,8 @@ public class AnnotatedBeanDefinitionReader {
 	<T> void doRegisterBean(Class<T> beanClass, @Nullable Supplier<T> instanceSupplier, @Nullable String name,
 			@Nullable Class<? extends Annotation>[] qualifiers, BeanDefinitionCustomizer... definitionCustomizers) {
 
+		//根据当前给定的class，创建其对应的AnnotatedGenericBeanDefinition
+		//对于类上的注解元数据使用AnnotatedGenericBeanDefinition中的属性AnnotationMetadata包装
 		AnnotatedGenericBeanDefinition abd = new AnnotatedGenericBeanDefinition(beanClass);
 		if (this.conditionEvaluator.shouldSkip(abd.getMetadata())) {//判断@Condition，是否需要跳过
 			return;
