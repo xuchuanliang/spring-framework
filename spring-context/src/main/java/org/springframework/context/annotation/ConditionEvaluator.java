@@ -71,7 +71,7 @@ class ConditionEvaluator {
 		return shouldSkip(metadata, null);
 	}
 
-	/**
+	/**判定当前对象如果有@Conditional注解，如果有@Conditional注解，则回调注解中指定的Condition接口的实现类的match()方法判断是否需要将当前类的BeanDefinition注册到spring容器中
 	 * Determine if an item should be skipped based on {@code @Conditional} annotations.
 	 * @param metadata the meta data
 	 * @param phase the phase of the call
@@ -105,6 +105,8 @@ class ConditionEvaluator {
 			if (condition instanceof ConfigurationCondition) {
 				requiredPhase = ((ConfigurationCondition) condition).getConfigurationPhase();
 			}
+			//从下面这行代码可以看出来，只有@Conditional注解中的所有Condition实现类的matches方法只要有一个结果是false，
+			// 那么本方法就会返回true，返回true就表示跳过当前这个BD的注册，也就是是且的关系
 			if ((requiredPhase == null || requiredPhase == phase) && !condition.matches(this.context, metadata)) {
 				return true;
 			}

@@ -20,6 +20,7 @@ import java.lang.annotation.Annotation;
 import java.util.function.Supplier;
 
 import org.springframework.beans.factory.annotation.AnnotatedGenericBeanDefinition;
+import org.springframework.beans.factory.annotation.Lookup;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionCustomizer;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
@@ -230,19 +231,30 @@ public class AnnotatedBeanDefinitionReader {
 	<T> void doRegisterBean(Class<T> beanClass, @Nullable Supplier<T> instanceSupplier, @Nullable String name,
 			@Nullable Class<? extends Annotation>[] qualifiers, BeanDefinitionCustomizer... definitionCustomizers) {
 
+		//1.
 		//根据当前给定的class，创建其对应的AnnotatedGenericBeanDefinition
 		//对于类上的注解元数据使用AnnotatedGenericBeanDefinition中的属性AnnotationMetadata包装
 		AnnotatedGenericBeanDefinition abd = new AnnotatedGenericBeanDefinition(beanClass);
+
+		//2.
+		//此处会判断@Conditional条件是否满足，如果不满足，则不会将当前解析到的BeanDefinition注册到spring容器中
 		if (this.conditionEvaluator.shouldSkip(abd.getMetadata())) {//判断@Condition，是否需要跳过
 			return;
 		}
 
 		abd.setInstanceSupplier(instanceSupplier);
-		ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(abd);//作用域元数据
-		abd.setScope(scopeMetadata.getScopeName());
-		String beanName = (name != null ? name : this.beanNameGenerator.generateBeanName(abd, this.registry));//生成beanName
 
-		AnnotationConfigUtils.processCommonDefinitionAnnotations(abd);//处理通用的注解，给bd进行赋值，如@lazy，@Primary，@DependsOn，@Role，@Description
+		//3.//处理@Scope注解，此时有可能会导致当前类被代理？？？每太看明白
+		ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(abd);
+		abd.setScope(scopeMetadata.getScopeName());
+
+		//4.
+		//生成beanName，如果class注解上有标记bean 的name，则使用，否则则会默认将类名首字母小写作为bean的名称
+		String beanName = (name != null ? name : this.beanNameGenerator.generateBeanName(abd, this.registry));
+
+		//5.
+		//处理该class上其他的通用的注解，并且将注解中指定的属性赋值到BD的属性中，如@lazy，@Primary，@DependsOn，@Role，@Description
+		AnnotationConfigUtils.processCommonDefinitionAnnotations(abd);
 		if (qualifiers != null) {
 			for (Class<? extends Annotation> qualifier : qualifiers) {
 				if (Primary.class == qualifier) {
@@ -260,8 +272,15 @@ public class AnnotatedBeanDefinitionReader {
 			customizer.customize(abd);
 		}
 
+		//5.
+		//创建一个当前BeanDefinition的持有器，即包装类
 		BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(abd, beanName);
+
+		//6.
+		//如果标记有@Scope注解，并且如果scope中指定的当前类的代理模式是TARGET_CLASS，则会做一些事情，后面会用cglib代理
 		definitionHolder = AnnotationConfigUtils.applyScopedProxyMode(scopeMetadata, definitionHolder, this.registry);//代理相关，jdk还是CGLIB？？没看明白
+
+		//7.
 		//将手动注册的要处理的Class的BeanDefinition注册到registry中，实际上是将BeanDefinition put到beanDefinitionMap中
 		BeanDefinitionReaderUtils.registerBeanDefinition(definitionHolder, this.registry);
 	}

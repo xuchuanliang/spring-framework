@@ -27,6 +27,8 @@ import org.springframework.util.StringUtils;
  * Holder for a BeanDefinition with name and aliases.
  * Can be registered as a placeholder for an inner bean.
  *
+ * BeanDefinitionHolder是BeanDefinition的持有器，使用bd的name和别名。理解成是BeanDefinition的包装类即可
+ *
  * <p>Can also be used for programmatic registration of inner bean
  * definitions. If you don't care about BeanNameAware and the like,
  * registering RootBeanDefinition or ChildBeanDefinition is good enough.

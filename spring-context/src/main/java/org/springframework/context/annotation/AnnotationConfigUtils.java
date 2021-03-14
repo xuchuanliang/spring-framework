@@ -44,7 +44,8 @@ import org.springframework.util.ClassUtils;
  * {@link org.springframework.beans.factory.config.BeanFactoryPostProcessor}
  * definitions for annotation-based configuration. Also registers a common
  * {@link org.springframework.beans.factory.support.AutowireCandidateResolver}.
- *
+ *	这是一个工具类，在以注解配置驱动的spring容器中，方便的注入一些spring通用的BeanPostProcessor，BeanFactoryPostProcessor。
+ *	也会注册一个通用的AutowireCandidateResolver。
  * @author Mark Fisher
  * @author Juergen Hoeller
  * @author Chris Beams

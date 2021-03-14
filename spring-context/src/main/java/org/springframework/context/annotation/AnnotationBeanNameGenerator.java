@@ -42,6 +42,8 @@ import org.springframework.util.StringUtils;
  * themselves annotated with
  * {@link org.springframework.stereotype.Component @Component}.
  *
+ * AnnotationBeanNameGenerator是BeanNameGenerator的实现类，用来处理直接或间接标记有@Component注解的类
+ *
  * <p>Also supports Java EE 6's {@link javax.annotation.ManagedBean} and
  * JSR-330's {@link javax.inject.Named} annotations, if available. Note that
  * Spring component annotations always override such standard annotations.
@@ -49,7 +51,7 @@ import org.springframework.util.StringUtils;
  * <p>If the annotation's value doesn't indicate a bean name, an appropriate
  * name will be built based on the short name of the class (with the first
  * letter lower-cased). For example:
- *
+ * 如果类上的注解没有指定bean的name，则会使用一个默认的名称，规则是类的名称，首字母小写
  * <pre class="code">com.xyz.FooServiceImpl -&gt; fooServiceImpl</pre>
  *
  * @author Juergen Hoeller
@@ -80,7 +82,7 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 	}
 
 	/**
-	 * Derive a bean name from one of the annotations on the class.
+	 * Derive a bean name from one of the annotations on the class. 从类的注解中获取bean的名称
 	 * @param annotatedDef the annotation-aware bean definition
 	 * @return the bean name, or {@code null} if none is found
 	 */
